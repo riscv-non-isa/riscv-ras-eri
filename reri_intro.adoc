@@ -2,11 +2,293 @@
 
 == Introduction
 
+A system is an entity that interacts with other entities such as other systems,
+software, operators, etc. to deliver one or more services in its role as a
+service provider. A system may itself be a consumer of one or more services
+provided by one or more other systems. A system thus is a collection of
+interacting components that implement one or more functions to provide a
+service.
+
+A service is the behavior as perceived by the consumers of the service. A system
+may implement the service as one or more functions in the system. The functions
+used to compose the service may be implemented by one or more components in the
+system.
+
+A service is described as a set of states that can be observed by the consumer
+of the service. The set of states observed by the consumer of the service may be
+further dependent on a set of internal states of the functions that implement
+the service.
+
+A service is said to be correct if the set of states observed by the consumer of
+the service match the specification of that service. The specifications of a
+service may include its functional behavior, performance goals,
+security objectives, and RAS requirements.
+
+Reliability of a system as a function of time is the probability it continues to
+provide correct service and may be characterized by metrics such as mean time
+between failures (MTBF). The services provided by a reliable system fail on
+faults instead of silently producing incorrect results. Reliable systems
+incorporate methods to detect occurrence of errors and to signal the errors to
+the consumers of the service.
+
+Availability of a system as a function of time is the probability that the
+system provides the expected service and is a measure of tolerance of errors.
+Systems may increase the availability by minimizing the impact of the errors in
+one part of the system to the rest of the system. These may be achieved by means
+such as error correction, redundancy, state checkpointing and rollbacks, error
+prediction, and error containment.
+
+Serviceability is a measure of time to restore the service to correct operation
+with minimal disruption to the consumers of the service. These may be achieved
+by means such as identifying and reporting failures and supporting mechanisms to
+repair and bring the system back online.
+
+The RERI specification augments RAS features in the SoC with a standard
+mechanism for reporting and logging errors by means of a memory-mapped register
+interface to enable error detection, provide the facility to log the detected
+errors (including their severity, nature, and location), and configuring means
+to report the error to a handler component. Additionally, this specification
+shall support software-initiated error logging, reporting, and testing of error
+handlers. Lastly, this specification shall provide maximal flexibility to
+implement error handling and shall co-exist with RAS frameworks defined by other
+standards such as PCIe, CXL, etc.
+
+=== Faults and Errors
+
+Fault is an incorrect state resulting from failures of components or due to
+interference from the environment in which the system operates. A fault is
+permanent if it reflects an irreversible change to the observable system state
+else the fault is transient. A permanent fault may occur due to a physical
+defect or due to a flaw in the design of the functions implementing the service
+itself. A transient fault may occur due to temporary environmental conditions
+(cosmic rays, voltage glitches, etc.) or due to instability (e.g. marginal
+hardware).
+
+Some faults that occur in a component may be dormant and only affect the
+internal state of the component. Such dormant faults however may turn into
+active faults when that internal state is used by the computation process in
+that component and produce an error. An error is detected when its presence is
+indicated by an error message or signal. Malicious software, especially software
+operating at privileged modes of operation of the system, may attempt to cause
+errors; the RAS capabilities are designed to prevent such software-induced
+errors.
+
+Software faults may similarly cause errors that cause the service provided by
+the system to deviate from its specification. Well known software engineering
+and reliability techniques may be employed to prevent, detect and recover from
+software errors. Software errors are not in the scope of this specification.
+Software should not have the ability to induce hardware errors.
+
+A service failure occurs when the service deviates from its specification due
+to errors.
+
+Errors may propagate from component X to another component Y that consumes the
+results of the computation in component X and appears as an error that was
+detected by an external component. Eventually, if the error propagates to the
+external state of the service implemented by these components then a service
+failure occurs.
+
+A reliable system deals with errors through one or more of the following
+techniques:
+
+* Fault prevention
+* Error detection and correction
+* Error forecasting
+
+=== Fault prevention
+
+Fault prevention involves use of techniques that reduce or prevent errors that
+may occur after the product has been shipped. These may be accomplished through
+the use of high quality in product design, technology selection, materials
+selection, and manufacturing time screening for defects. Through the use of
+systematic design, technology selection, and manufacturing tests many errors
+such as those induced by electric fields, temperature stress, switching/coupling
+noise (e.g. DRAM RowHammer effect), incorrect V/F operating points,
+insufficient guard bands, metastability, etc. can be prevented.
+
+Faults that are not prevented may manifest as errors during operation of the
+system. Errors that are not detected may still lead to a service failure. For
+example, an undetected error in an adder used to produce the address of a load
+may produce a bad address which causes the load to incur an exception and lead
+to a service failure. Some undetected errors however may not manifest as
+exceptions and cause a service failure due to silent data corruption. For
+example, a circuit performing encryption of a database may silently cause an
+error in the ciphertext produced leading to the entire database being left in a
+state where it cannot be decrypted. Such undetected errors that do not lead to a
+service failure are called silent data errors (SDE). The impact of SDE is
+generally much higher than errors that lead to a service failure. A resilient
+system attempts to minimize the probability of SDE to the largest extent
+possible by implementing error detection capabilities.
+
+=== Error Detection and Correction
+
+Error detection involves the use of coding and protocols to detect errors. For
+example, caches with error correcting codes, TLB entries with parity protection,
+buses with parity protection on transaction fields, circuitry to detect
+unexpected and/or illegal encodings, gray codes, voltage sensors, clock/PLL
+monitors, timing margin sensors, etc. Some components such as memory controllers
+may actively attempt to detect errors using techniques such as periodic
+background scrubbing or on-demand scrubbing.
+
+Error correction involves the use of techniques to correct the detected errors.
+Error correction may be performed by employing error correcting codes and
+protocols.  For example, a processor cache may employ error correcting codes
+(ECC) to detect and correct errors. The number of bits of error that can be
+corrected or detected may depend on the type of error correction circuitry used.
+For example, SECDED (single error correction, double error detection) schemes
+can detect double bit errors and correct single bit errors whereas DECTED
+(double error correction, triple error detection) schemes can detect triple bit
+errors and correct double bit errors. Some schemes may be able to correct
+failure of an entire memory device. Some components may employ redundancy as a
+mechanism to do error correction. For example, memory controllers may employ
+fine-grained memory mirroring where a second copy of data is held in a backup
+memory which can be used if the memory holding the primary copy fails. Some
+memory controllers may support a mode where data can be migrated to a spare DIMM
+connected to the memory controller if a DIMM develops an uncorrectable error.
+Some DIMMs and memory controllers may support a Fail Row address repair
+capability by which a failed row element in a bank group can be recovered from.
+Some components such as encryption engines may attempt to decrypt the encrypted
+data to check if a transient error occurred during the encryption process and
+retry the encryption to recover from the error. Some components may recover
+from errors by using protocols that involve a retry. For example, a TLB that
+detects an error may invalidate the entry and attempt to refill it from the
+page tables, a receiver on a bus that detects an error may request the
+transmitter to retransmit the transaction, etc. Error correction is thus
+complete when the error is either corrected or it does not recur on retry.
+Such errors are called *corrected errors (CE)*.
+
+Errors that could not be corrected are called uncorrected errors. A component
+that detects an uncorrected data error may allow possibly corrupted data to
+propagate to the requester of the data but associate a poison indicator with
+the data. Such errors are said to be *deferred errors (DE)* as they allow the
+component to continue operation and defer dealing with the error to a later
+point in time if the data corrupted by the error is consumed. The component
+that detected and deferred the error may signal an error recovery handler by
+logging the DE but such DE does not need an immediate remedial action to be
+performed by the error handler.  For example, a memory controller may detect
+an uncorrectable ECC error on a data in memory but since there is no immediate
+consumer of the data the memory controller may just mark the data as poisoned
+and defer the error handling to a component that requests the data. If the
+poisoned data is never consumed then deferred errors are benign. If the
+poisoned data is completely overwritten with new data then the associated
+poison is cleared. If the poisoned data is only partially written then the
+data continues to be marked as poisoned. If the poisoned data is consumed by a
+component (e.g. a hart, an IOMMU, a device, etc.) then an *urgent error (UE)*
+occurs and a recovery handler is invoked as immediate remedial actions are
+required and further deferreral of the error is not possible.
+
+A component that detects an uncorrected error may be unable to defer the
+handling of the error by techniques such as poisoning and may instead signal
+an error recovery handler by logging the UE. For example, a cache controller
+may detect an uncorrectable ECC error on the memory used to hold cache tags
+and since such errors cannot be attributed to any particular data element
+these errors may be classified as UE.
+
+A component that signals a request for execution of an error recovery handler
+for an UE may indicate that the error has not propagated beyond the boundaries
+of the component that detected the error and thus may be *containable* through
+recovery actions (e.g., terminating the computation, etc.) carried out by the
+error recovery handler.
+
+Some components act as an intermediary through which the data passes through.
+For example, a PCIe/CXL port is an intermediary component that by itself does
+not consume the data it receives from memory but forwards the data to the
+endpoint. In such cases the component may receive the data with a deferred
+error. Such a component may propagate the error and not log an error by itself.
+However, if the component to which the data is being propagated (e.g. a PCIe
+endpoint) is not capable of handling poison then the former component  must
+signal a UE instead of propagating the corrupted data, as the act of
+propagation breaks containment of the error.
+
+An error detected by a component may lead to a failure mode where the component
+may not be able to service requests anymore (e.g. colloquially called jammed,
+wedged, etc.). For example, an error in the hart pipeline may cause the hart to
+stop committing instructions, a fabric may be in a state where it cannot process
+any further requests, the link connecting the memory module to the host may have
+failed, etc. In such cases invoking a software recovery handler may not be useful
+as the recovery handler itself needs to generate requests to the failed component
+to perform the recovery actions. Components in such failed states may use an
+implementation-defined signal to a system recovery controller (e.g., a board
+management controller (BMC), an on-chip service controller, etc.) to initiate a
+RAS-handling reset to restart the component, sub-system, or the system itself to
+restore correct service operations.
+
+=== Error Forecasting
+Error forecasting involves the use of corrected errors as a predictor of future
+uncorrectable permanent failures or other systemic issues such as marginality
+due to aging, etc. A future service failure could be avoided if the corrected
+errors can be monitored. To support such monitoring components in a resilient
+system may include counters to count the corrections performed. Such components
+may further include a threshold or support a programmable threshold to notify
+error handlers when the number of corrected errors exceeds the threshold. A
+component may also track history of corrected errors and determine if the
+corrected errors are being triggered by transient faults or permanent faults.
+For example, a cache may detect that certain cells are repeatedly causing
+errors, a bus may detect that a certain lane is stuck at a logic level and
+causing errors, etc. In such cases the system may be able to continue operation
+due to error correction ability but may still raise a notification to error
+handlers such that maintenance can be scheduled to replace the failing
+components in the system.
+
 === Glossary
 .Terms and definitions
 [width=90%]
 [%header, cols="5,20"]
 |===
 | Term            ^| Definition
-|                  | 
+| CE               | Corrected error.
+| CXL              | Compute Express Link bus standard.
+| DE               | Deferred error.
+| GPA              | Guest Physical Address: An address in the virtualized
+                     physical memory space of a virtual machine.
+| ID               | Identifier.
+| OS               | Operating system.
+| PCIe             | Peripheral Component Interconnect Express bus standard.
+| RAS              | Reliability, Availability, and Serviceability.
+| RERI             | RAS error record register interface.
+| Reserved         | A register or data structure field reserved for future use.
+                     Reserved fields in data structures must be set to 0 by
+                     software. Software must ignore reserved fields in registers
+                     and preserve the value held in these fields when writing
+                     values to other fields in the same register.
+| Reserved         | A register or data structure field reserved for future use.
+                     Reserved fields in data structures must be set to 0 by
+                     software. Software must ignore reserved fields in registers
+                     and preserve the value held in these fields when writing
+                     values to other fields in the same register.
+| RO               | Read-only - Register bits are read-only and cannot be altered
+                     by software. Where explicitly defined, these bits are used
+                     to reflect changing hardware state, and as a result bit
+                     values can be observed to change at run time. +
+                     If the optional feature that would Set the bits is not
+                     implemented, the bits must be hardwired to Zero
+| RW               | Read-Write - Register bits are read-write and are permitted
+                     to be either Set or Cleared by software to the desired
+                     state. +
+                     If the optional feature that is associated with the bits is
+                     not implemented, the bits are permitted to be hardwired to
+                     Zero.
+| RW1C             | Write-1-to-clear status - Register bits indicate status when
+                     read. A Set bit indicates a status event which is Cleared by
+                     writing a 1b. Writing a 0b to RW1C bits has no effect. +
+                     If the optional feature that would Set the bit is not
+                     implemented, the bit must be read-only and hardwired to Zero
+| RW1S             | Read-Write-1-to-set - register bits indicate status when
+                     read. The bit may be Set by writing 1b. Writing a 0b to RW1S
+                     bits has no effect. +
+                     If the optional feature that introduces the bit is not
+                     implemented, the bit must be read-only and hardwired to Zero
+| SOC              | System on a chip, also referred as system-on-a-chip and
+                     system-on-chip.
+| SPA              | Supervisor Physical Address: Physical address used to
+                     to access memory and memory-mapped resources.
+| VA               | Virtual Address.
+| UE               | Urgent error.
+| WARL             | Write Any values, Reads Legal values: Attribute of a
+                     register field that is only defined for a subset of bit
+                     encodings, but allow any value to be written while
+                     guaranteeing to return a legal value whenever read.
+| WPRI             | Writes Preserve values, Reads Ignore values:
+                     Attribute of a register field that is reserved for future
+                     use.
 |===
