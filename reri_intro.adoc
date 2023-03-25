@@ -1,0 +1,12 @@
+[[intro]]
+
+== Introduction
+
+=== Glossary
+.Terms and definitions
+[width=90%]
+[%header, cols="5,20"]
+|===
+| Term            ^| Definition
+|                  | 
+|===
