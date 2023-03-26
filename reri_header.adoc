@@ -58,7 +58,5 @@ Copyright 2022 by RISC-V International.
 [preface]
 include::reri_contributors.adoc[]
 include::reri_intro.adoc[]
-include::reri_registers.adoc[]
-include::reri_sw_guidelines.adoc[]
-include::reri_hw_guidelines.adoc[]
+include::reri_logging.adoc[]
 include::reri_bibliography.adoc[]
