@@ -1,8 +1,8 @@
 [[header]]
-:description: RISC-V Example Specification Document (Zexmpl)
+:description: RISC-V RAS Error Record Register Interface Specification
 :company: RISC-V.org
-:revdate: 1/2022
-:revnumber: 1.0
+:revdate: 03/2023
+:revnumber: 0.1
 :revremark: This document is in development. Assume everything can change. See http://riscv.org/spec-state for details.
 :url-riscv: http://riscv.org
 :doctype: book
@@ -14,12 +14,10 @@
 // Settings:
 :experimental:
 :reproducible:
-// needs to be changed? bug discussion started
-//:WaveDromEditorApp: app/wavedrom-editor.app
 :imagesoutdir: images
-:bibtex-file: example.bib
-:bibtex-order: alphabetical
-:bibtex-style: apa
+:bibtex-file: reri.bib
+:bibtex-order: appearance
+:bibtex-style: ieee
 :icons: font
 :lang: en
 :listing-caption: Listing
@@ -36,8 +34,8 @@ endif::[]
 :footnote:
 :xrefstyle: short
 
-= RISC-V Example Specification Document (Zexmpl)
-Author 1; Author 2; RISC-V Task Group
+= RISC-V RERI Architecture Specification
+RERI Task Group
 
 // Preamble
 [WARNING]
@@ -58,10 +56,7 @@ https://creativecommons.org/licenses/by/4.0/.
 Copyright 2022 by RISC-V International.
 
 [preface]
-include::contributors.adoc[]
-
-include::intro.adoc[]
-include::chapter2.adoc[]
-//the index must precede the bibliography
-include::index.adoc[]
-include::bibliography.adoc[]
+include::reri_contributors.adoc[]
+include::reri_intro.adoc[]
+include::reri_logging.adoc[]
+include::reri_bibliography.adoc[]

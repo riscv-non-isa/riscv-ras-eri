@@ -1,5 +1,5 @@
-HEADER_SOURCE := header.adoc
-PDF_RESULT := example-spec.pdf
+HEADER_SOURCE := reri_header.adoc
+PDF_RESULT := riscv-reri.pdf
 
 all: build
 
