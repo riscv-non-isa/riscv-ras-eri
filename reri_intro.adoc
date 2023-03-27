@@ -48,7 +48,7 @@ Availability of a system as a function of time is the probability that the
 system provides the expected service and is a measure of tolerance of errors.
 Systems may increase the availability by minimizing the impact of the errors in
 one part of the system to the rest of the system. These may be achieved by means
-such as error correction, redundancy, state checkpointing and rollbacks, error
+such as error correction, redundancy, state checkpoints and rollbacks, error
 prediction, and error containment.
 
 Serviceability is a measure of time to restore the service to correct operation
@@ -107,7 +107,7 @@ selection, and manufacturing time screening for defects. Through the use of
 systematic design, technology selection, and manufacturing tests many errors
 such as those induced by electric fields, temperature stress, switching/coupling
 noise (e.g. DRAM RowHammer effect), incorrect V/F operating points,
-insufficient guard bands, metastability, etc. can be prevented.
+insufficient guard bands, meta-stability, etc. can be prevented.
 
 Faults that are not prevented may manifest as errors during operation of the
 system. Errors that are not detected may still lead to a service failure. For
