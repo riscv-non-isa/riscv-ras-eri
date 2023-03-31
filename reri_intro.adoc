@@ -2,6 +2,19 @@
 
 == Introduction
 
+The RERI specification augments RAS features in the SoC with a standard
+mechanism for reporting and logging errors by means of a memory-mapped register
+interface to enable error logging, provide the facility to log the detected
+errors (including their severity, nature, and location), and configuring means
+to report the error to a RAS handler component. The RAS handler may use this
+information to determine suitable recovery actions that may include terminating
+the computation (e.g., terminating a process, etc.), restarting parts or all of
+the system, etc. to recover from the errors. Additionally, this specification
+shall support software-initiated error logging, reporting, and testing of error
+handlers. Lastly, this specification shall provide maximal flexibility to
+implement error handling and shall co-exist with RAS frameworks defined by other
+standards such as PCIe, CXL, etc.
+
 A system is an entity that interacts with other entities such as other systems,
 software, operators, etc. to deliver one or more services in its role as a
 service provider. A system may itself be a consumer of one or more services
@@ -42,16 +55,6 @@ Serviceability is a measure of time to restore the service to correct operation
 with minimal disruption to the consumers of the service. These may be achieved
 by means such as identifying and reporting failures and supporting mechanisms to
 repair and bring the system back online.
-
-The RERI specification augments RAS features in the SoC with a standard
-mechanism for reporting and logging errors by means of a memory-mapped register
-interface to enable error detection, provide the facility to log the detected
-errors (including their severity, nature, and location), and configuring means
-to report the error to a handler component. Additionally, this specification
-shall support software-initiated error logging, reporting, and testing of error
-handlers. Lastly, this specification shall provide maximal flexibility to
-implement error handling and shall co-exist with RAS frameworks defined by other
-standards such as PCIe, CXL, etc.
 
 === Faults and Errors
 
@@ -133,49 +136,37 @@ background scrubbing or on-demand scrubbing.
 Error correction involves the use of techniques to correct the detected errors.
 Error correction may be performed by employing error correcting codes and
 protocols.  For example, a processor cache may employ error correcting codes
-(ECC) to detect and correct errors. The number of bits of error that can be
-corrected or detected may depend on the type of error correction circuitry used.
-For example, SECDED (single error correction, double error detection) schemes
-can detect double bit errors and correct single bit errors whereas DECTED
-(double error correction, triple error detection) schemes can detect triple bit
-errors and correct double bit errors. Some schemes may be able to correct
-failure of an entire memory device. Some components may employ redundancy as a
-mechanism to do error correction. For example, memory controllers may employ
-fine-grained memory mirroring where a second copy of data is held in a backup
-memory which can be used if the memory holding the primary copy fails. Some
-memory controllers may support a mode where data can be migrated to a spare DIMM
-connected to the memory controller if a DIMM develops an uncorrectable error.
-Some DIMMs and memory controllers may support a Fail Row address repair
-capability by which a failed row element in a bank group can be recovered from.
-Some components such as encryption engines may attempt to decrypt the encrypted
-data to check if a transient error occurred during the encryption process and
-retry the encryption to recover from the error. Some components may recover
-from errors by using protocols that involve a retry. For example, a TLB that
-detects an error may invalidate the entry and attempt to refill it from the
-page tables, a receiver on a bus that detects an error may request the
-transmitter to retransmit the transaction, etc. Error correction is thus
-complete when the error is either corrected or it does not recur on retry.
-Such errors are called *corrected errors (CE)*.
+(ECC) to detect and correct errors. Some components may recover from errors by
+using protocols that involve a retry. For example, a TLB that detects an error
+may invalidate the entry and attempt to refill it from the page tables, a
+receiver on a bus that detects an error may request the transmitter to
+retransmit the transaction, etc. Error correction is thus complete when the
+error is either corrected or it does not recur on retry. Such errors that were
+corrected by the hardware are called *corrected errors (CE)*.
 
 Errors that could not be corrected are called uncorrected errors. A component
-that detects an uncorrected data error may allow possibly corrupted data to
-propagate to the requester of the data but associate a poison indicator with
-the data. Such errors are said to be *deferred errors (DE)* as they allow the
-component to continue operation and defer dealing with the error to a later
-point in time if the data corrupted by the error is consumed. The component
-that detected and deferred the error may signal an error recovery handler by
-logging the DE but such DE does not need an immediate remedial action to be
-performed by the error handler.  For example, a memory controller may detect
-an uncorrectable ECC error on a data in memory but since there is no immediate
-consumer of the data the memory controller may just mark the data as poisoned
-and defer the error handling to a component that requests the data. If the
-poisoned data is never consumed then deferred errors are benign. If the
-poisoned data is completely overwritten with new data then the associated
-poison is cleared. If the poisoned data is only partially written then the
-data continues to be marked as poisoned. If the poisoned data is consumed by a
-component (e.g. a hart, an IOMMU, a device, etc.) then an *urgent error (UE)*
-occurs and a recovery handler is invoked as immediate remedial actions are
-required and further deferral of the error is not possible.
+that detects an uncorrected error may allow possibly corrupted data to
+propagate to the requester of the data but associate an indicator (e.g., poison)
+with the data. Such errors are said to be *deferred errors (DE)* as they allow
+the component to continue operation and defer dealing with the error to a later
+point in time if the data corrupted by the error is consumed. Defering errors
+allows deferring the error handling to an ultimate consumer of the corrupted
+data that may be able to provide more precise information to an error handler
+about the contexts affected by the corruption and thus enable more precise error
+recover actions by the erro handler. The component that detected and deferred
+the error may signal an error recovery handler by logging the DE but such DE
+does not need an immediate remedial action to be performed by the error handler.
+For example, a memory controller may detect an uncorrectable ECC error on a
+data in memory but since there is no immediate consumer of the data the memory
+controller may just mark the data as poisoned and defer the error handling to a
+component that requests the data. If the poisoned data is never consumed then
+deferred errors are benign. If the poisoned data is completely overwritten with
+new data then the associated poison is cleared. If the poisoned data is only
+partially written then the data continues to be marked as poisoned. If the
+poisoned data is consumed by a component (e.g. a hart, an IOMMU, a device,
+etc.) then an *urgent error (UE)* occurs and a recovery handler is invoked as
+immediate remedial actions are required and further deferreral of the error is
+not possible.
 
 A component that detects an uncorrected error may be unable to defer the
 handling of the error by techniques such as poisoning and may instead signal
@@ -237,20 +228,19 @@ components in the system.
 |===
 | Term            ^| Definition
 | CE               | Corrected error.
+| Custom           | A register or data structure field designated for custom
+                     use. Software that is not aware of the custom use must
+                     ignore custom fields and preserve value held in these
+                     fields when writing values to other fields in the same
+                     register.
 | CXL              | Compute Express Link bus standard.
 | DE               | Deferred error.
-| GPA              | Guest Physical Address: An address in the virtualized
-                     physical memory space of a virtual machine.
+| GPA              | Guest Physical Address. See Priv. specification.
 | ID               | Identifier.
 | OS               | Operating system.
 | PCIe             | Peripheral Component Interconnect Express bus standard.
 | RAS              | Reliability, Availability, and Serviceability.
 | RERI             | RAS error record register interface.
-| Reserved         | A register or data structure field reserved for future use.
-                     Reserved fields in data structures must be set to 0 by
-                     software. Software must ignore reserved fields in registers
-                     and preserve the value held in these fields when writing
-                     values to other fields in the same register.
 | Reserved         | A register or data structure field reserved for future use.
                      Reserved fields in data structures must be set to 0 by
                      software. Software must ignore reserved fields in registers
@@ -280,9 +270,8 @@ components in the system.
                      implemented, the bit must be read-only and hardwired to Zero
 | SOC              | System on a chip, also referred as system-on-a-chip and
                      system-on-chip.
-| SPA              | Supervisor Physical Address: Physical address used to
-                     to access memory and memory-mapped resources.
-| VA               | Virtual Address.
+| SPA              | Supervisor Physical Address. See Priv. specification.
+| VA               | Virtual Address. See Priv. specification.
 | UE               | Urgent error.
 | WARL             | Write Any values, Reads Legal values: Attribute of a
                      register field that is only defined for a subset of bit
@@ -290,5 +279,5 @@ components in the system.
                      guaranteeing to return a legal value whenever read.
 | WPRI             | Writes Preserve values, Reads Ignore values:
                      Attribute of a register field that is reserved for future
-                     use.
+                     standard use.
 |===

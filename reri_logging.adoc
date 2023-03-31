@@ -93,7 +93,9 @@ The reset value is 0 for the following registers fields.
 
 The reset value is `UNSPECIFIED` for all other registers and/or fields.
 
-=== Vendor and implementation ID (`vendor_n_imp_id`)
+=== Register description
+
+==== Vendor and implementation ID (`vendor_n_imp_id`)
 
 The `vendor_n_imp_id` register is a read-only register and its layout is:
 
@@ -118,7 +120,7 @@ may be returned to indicate that the field is not implemented. The value
 returned should reflect the design of the component itself and not of the
 surrounding system.
 
-=== Error bank information (`bank_info`)
+==== Error bank information (`bank_info`)
 
 The `bank_info` is a read-only register and its layout is as follows:
 
@@ -157,7 +159,7 @@ records of an error bank are located in the 4 KiB memory mapped region reserved
 for the error bank such that the first error record is at offset 64 and the last
 error record at offset (64 + 64 * `n_err_recs`).
 
-=== Summary of valid error records (`valid_summary`)
+==== Summary of valid error records (`valid_summary`)
 
 The `valid_summary` is a read-only register and its layout is as follows:
 
@@ -184,7 +186,7 @@ determine if there is a valid error logged in that error record.
 ====
 
 
-=== Control register (`control_i`)
+==== Control register (`control_i`)
 
 The `control_i` is a read/write WARL register used to control error logging by
 the corresponding error record in the error bank. The layout of this register
@@ -286,7 +288,7 @@ be misused to maliciously inject hardware errors that may lead to security
 issues.
 ====
 
-=== Status register (`status_i`)
+==== Status register (`status_i`)
 
 The `status_i` is a read-write WARL register that reports errors detected by
 the hardware unit.
@@ -475,7 +477,7 @@ determine if the value (besides the `v` field) changed. If a change was detected
 then the process may be repeated to read the latest reported error.
 ====
 
-=== Address register (`addr_i`)
+==== Address register (`addr_i`)
 
 The `addr_i` is a WARL register that reports the address associated with the
 detected error when `status_i.at` is not 0. If `status_i.at` is 0, the value in
