@@ -42,12 +42,6 @@ A error bank that is otherwise available for memory-mapped accesses must respond
 with all zero data on reads and must ignore writes to unimplemented registers in
 the page.
 
-The registers of an error bank may preserve their value across certain types
-of reset and may initialize their values, as defined in this specification,
-across other types of resets. For example, a warm reset may preserve the
-register values whereas a cold reset may reset the values back to their initial
-state. However, registers in any given error bank must have the same reset
-behavior.
 
 === Register layout
 
@@ -78,17 +72,21 @@ from 0 to 62.
 |===
 
 === Reset behavior
-The reset value is 0 for the following registers fields.
+The reset value is 0 for the following registers fields on all reset.
 
-* `valid_summary.svv` 
 * `control_i.eid`
 * `control_i.uee`
 * `control_i.dee`
 * `control_i.cee`
 * `status_i.cece`
-* `status_i.v`
 
-The reset value is `UNSPECIFIED` for all other registers and/or fields.
+The reset value is `UNSPECIFIED` for all other registers and/or fields. The
+registers of an error bank may preserve their value across certain types of
+reset and may initialize their values, as defined in this specification, across
+other types of resets. For example, a warm reset or a RAS initiated reset may
+preserve the register values whereas a cold reset may reset the values back
+to their initial state. Registers in any given error bank must have the same
+reset behavior.
 
 === Error bank registers
 
