@@ -592,7 +592,7 @@ error are retained (i.e., are sticky).
 The rules for writing the error record are as follows:
 
 .Error record writing rules
-[source, text]
+[source, ruby]
 ----
     Let new_status be the value to be recorded in status_i register for the new error
     overwrite = FALSE
