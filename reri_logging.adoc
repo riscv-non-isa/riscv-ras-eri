@@ -17,9 +17,9 @@ that error record.
 
 The behavior for register accesses where the address is not aligned to
 the size of the access, or if the access spans multiple registers, of if the
-size of the access is not 4 bytes or 8 bytes, is `UNSPECIFIED`. An aligned
-4-byte or an aligned 8-byte access to an RERI register must be single-copy
-atomic.
+size of the access is not 4 bytes or 8 bytes, is `UNSPECIFIED`. The atomicity of
+access to an 8 byte register is `UNSPECIFIED`. An aligned 4 byte access to a
+RERI register must be single-copy atomic.
 
 The RERI registers have little-endian byte order (even for systems where
 all harts are big-endian-only).
@@ -41,7 +41,6 @@ the attempted transaction.
 A error bank that is otherwise available for memory-mapped accesses must respond
 with all zero data on reads and must ignore writes to unimplemented registers in
 the page.
-
 
 === Register layout
 
@@ -85,7 +84,7 @@ registers of an error bank may preserve their value across certain types of
 reset and may initialize their values, as defined in this specification, across
 other types of resets. For example, a warm reset or a RAS initiated reset may
 preserve the register values whereas a cold reset may reset the values back
-to their initial state. Registers in any given error bank must have the same
+to their initial state. All registers in an error bank must have the same
 reset behavior.
 
 === Error bank registers
@@ -344,7 +343,8 @@ the hardware unit.
   {bits: 1,  name: 'tsv'},
   {bits: 1,  name: 'scrub'},
   {bits: 1,  name: 'ceco'},
-  {bits: 11,  name: 'ec'},
+  {bits: 3,  name: 'WPRI'},
+  {bits: 8,  name: 'ec'},
   {bits: 16, name: 'reserved'},
   {bits: 16, name: 'cec'},
 ], config:{lanes: 4, hspace:1024}}
@@ -712,6 +712,6 @@ to report errors logged in the AER logs.
 |  25        | System internal controller (power management, security, etc.) error
 |  26        | Deferred error passthrough not supported
 |  27        | PCIe/CXL component detected errors.
-|  28 - 1023 | Reserved for standard extensions.
-|1024 - 2047 | Designated for custom use.
+|  28 - 127  | Reserved for future standard extensions.
+| 128 - 255  | Designated for custom use.
 |===
