@@ -17,50 +17,37 @@ that error record.
 
 The behavior for register accesses where the address is not aligned to
 the size of the access, or if the access spans multiple registers, of if the
-size of the access is not 4 bytes or 8 bytes, is `UNSPECIFIED`. The atomicity
-of access to an 8 byte register is `UNSPECIFIED`. The implementation may
-observe the 8 byte access as two 4 byte accesses. A 4 byte access to an IOMMU
-register must be single-copy atomic.
-
-[NOTE]
-====
-If an implementation may observe a 8 byte register access as two 4 byte
-accesses then such implementations must preserve the semantics of the 8 byte
-access and must cause any side effects only after both accesses have been
-observed.
-====
+size of the access is not 4 bytes or 8 bytes, is `UNSPECIFIED`. The atomicity of
+access to an 8 byte register is `UNSPECIFIED`. An aligned 4 byte access to a
+RERI register must be single-copy atomic.
 
 The RERI registers have little-endian byte order (even for systems where
 all harts are big-endian-only).
 
 [NOTE]
 ====
-Big-endian-configured harts that make use of an IOMMU are expected to implement
-the `REV8` byte-reversal instruction defined by the Zbb extension. If `REV8` is
-not implemented, then endianness conversion may be implemented using a sequence
+Big-endian-configured harts that make use of an RERI may implement the `REV8`
+byte-reversal instruction defined by the Zbb extension. If `REV8` is not
+implemented, then endianness conversion may be implemented using a sequence
 of instructions.
 ====
 
 An implementation-specific response occurs if the error bank and/or record is
 unavailable (e.g., powered down) to memory-mapped accesses. For example, an
 error bank and/or record  may respond with all zero data on reads and may
-ignore writes.
+ignore writes. Other implementations may for example, signal a error response on
+the attempted transaction.
 
 A error bank that is otherwise available for memory-mapped accesses must respond
 with all zero data on reads and must ignore writes to unimplemented registers in
 the page.
 
-The RAS registers of a error bank may preserve their value across certain types
-of reset and may initialize their values, as defined in this specification,
-across other types of resets. For example, a warm reset may preserve the
-register values whereas a cold reset may reset the values back to their initial
-state.
-
 === Register layout
 
 The error bank registers are organized as a 64-byte header providing information
 about the error bank followed by an array of 64-byte error records. The offset
-of error record numbered `i` in the bank is (64 + `i` * 64).
+of error record numbered `i` in the bank is (64 + `i` * 64) where `i` may range
+from 0 to 62.
 
 .Error bank Memory-mapped register layout
 [width=100%]
@@ -125,11 +112,18 @@ provides the JEDEC manufacturer ID of the provider of the component hosting the
 error bank. A value of 0 may be returned to indicate the field is not
 implemented or that this is a non-commercial implementation.
 
-The `imp_id` provides a unique identity, defined by the vendor, to identify
-revisions of the component implementation hosting the error bank. A value of 0
-may be returned to indicate that the field is not implemented. The value
-returned should reflect the design of the component itself and not of the
+The `imp_id` provides a unique identity, defined by the vendor, to identify the
+component and revisions of the component implementation hosting the error bank.
+A value of 0 may be returned to indicate that the field is not implemented. The
+value returned should reflect the design of the component itself and not of the
 surrounding system.
+
+[NOTE]
+====
+The `vendor_id` and the `imp_id` are expected to be used as a identifier to
+determine the format of fields and encodings that `UNSPECIFIED` by this
+specification.
+====
 
 ==== Error bank information (`bank_info`)
 
@@ -141,7 +135,7 @@ The `bank_info` is a read-only register and its layout is as follows:
 {reg: [
   {bits: 16, name: 'inst_id'},
   {bits: 16, name: 'n_err_recs'},
-  {bits:  8, name: 'reserved'},
+  {bits: 24, name: 'reserved'},
   {bits:  8, name: 'version'},
 ], config:{lanes: 2, hspace:1024}}
 ....
@@ -150,9 +144,17 @@ The `version` field returns the version of the architectural register layout
 specification implemented by the error bank. The version defined by this
 specification is 0x01.
 
+[NOTE]
+====
+The offset of the `version` field in the error bank shall not change across
+versions of the register layout. Software should first read the `version` field
+and use the value to determine the register layout.
+====
+
 The `inst_id` field identifies a unique instance, within a package or at least a
 silicon die, of the component; ideally unique in the whole system. The `inst_id`
 are defined by the vendor of the system as a unique identifier for the component.
+A value of 0 may be returned to indicate the field is not implemented.
 
 [NOTE]
 ====
@@ -165,10 +167,10 @@ software intimately familiar with that system implementation.
 ====
 
 The `n_err_recs` field indicates the number of error records implemented by the
-error bank. The field is allowed to have a value between 1 and 63. The error
-records of an error bank are located in the 4 KiB memory mapped region reserved
-for the error bank such that the first error record is at offset 64 and the last
-error record at offset (64 + 64 * `n_err_recs`).
+error bank. The field is allowed to have a unsigned value between 1 and 63. The
+error records of an error bank are located in the 4 KiB memory mapped region
+reserved for the error bank such that the first error record is at offset 64
+and the last error record at offset (64 + 63 * `n_err_recs`).
 
 ==== Summary of valid error records (`valid_summary`)
 
@@ -345,7 +347,8 @@ the hardware unit.
   {bits: 1,  name: 'tsv'},
   {bits: 1,  name: 'scrub'},
   {bits: 1,  name: 'ceco'},
-  {bits: 11,  name: 'ec'},
+  {bits: 3,  name: 'WPRI'},
+  {bits: 8,  name: 'ec'},
   {bits: 16, name: 'reserved'},
   {bits: 16, name: 'cec'},
 ], config:{lanes: 4, hspace:1024}}
@@ -380,7 +383,7 @@ valid if an UE is recorded in the error record.
 ====
 For example, a RISC-V hart by causing the precise data corruption exception on
 attempts to consume corrupted/poisoned data may contain the error to the program
-currently executing on the hart. A RISC-V IOMMU by aborting the transaction that
+currently executing on the hart. A RISC-V RERI by aborting the transaction that
 caused the corrupted data from being consumed may contain the error to the device
 initiating the transaction, etc.
 
@@ -700,6 +703,6 @@ to report errors logged in the AER logs.
 |  25        | System internal controller (power management, security, etc.) error
 |  26        | Deferred error passthrough not supported
 |  27        | PCIe/CXL component detected errors.
-|  28 - 1023 | Reserved for standard extensions.
-|1024 - 2047 | Designated for custom use.
+|  28 - 127  | Reserved for future standard extensions.
+| 128 - 255  | Designated for custom use.
 |===
