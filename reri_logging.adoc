@@ -71,21 +71,25 @@ from 0 to 62.
 |===
 
 === Reset behavior
-The reset value is 0 for the following registers fields on all reset.
 
-* `control_i.eid`
-* `control_i.uee`
-* `control_i.dee`
-* `control_i.cee`
-* `status_i.cece`
+The reset value is `UNSPECIFIED` for RERI registers.
 
-The reset value is `UNSPECIFIED` for all other registers and/or fields. The
-registers of an error bank may preserve their value across certain types of
-reset and may initialize their values, as defined in this specification, across
-other types of resets. For example, a warm reset or a RAS initiated reset may
-preserve the register values whereas a cold reset may reset the values back
-to their initial state. All registers in an error bank must have the same
-reset behavior.
+The registers of an error bank may preserve their value across certain types of
+reset. For example, a warm reset or a RAS initiated reset may preserve the
+register values whereas a cold reset may reset the values back to their initial
+state.
+
+[NOTE]
+====
+Under normal circumstances, when an error is signaled, the RAS handler retrieves
+the logged errors to process the error condition. In some cases, the RAS handler
+may not be able to do such processing. For example, the system may be unable to
+support execution of the RAS handler and cause a RAS initiated reset. Preserving
+the information logged in error records across such resets allows reporting of
+unhandled errors that occured in a previous boot of the system.
+====
+
+All registers in an error bank must have the same reset behavior.
 
 === Error bank registers
 
@@ -588,10 +592,10 @@ error are retained (i.e., are sticky).
 The rules for writing the error record are as follows:
 
 .Error record writing rules
-[source, text]
+[source, ruby]
 ----
     Let new_status be the value to be recorded in status_i register for the new error
-
+    overwrite = FALSE
     if status_i.v == 1
         // There is a valid first error recorded
         if ( severity(new_error) > severity(status_i) )
@@ -604,7 +608,6 @@ The rules for writing the error record are as follows:
             status_i.MO = 0
             overwrite = TRUE
         endif
-
         if ( severity(new_status) == severity(status_i) )
             // Severity of second error is same as of first error
             // Note multiple occurrences of same severity error
@@ -613,11 +616,6 @@ The rules for writing the error record are as follows:
             if ( new_status.pri > status_i.pri )
                 overwrite = TRUE;
             endif
-        endif
-
-        if ( severity(new_status) < severity(status_i) )
-            // Severity of second error is lower than of first error
-            overwrite = FALSE;
         endif
     else
         // There is a no error valid recorded
@@ -638,14 +636,7 @@ The rules for writing the error record are as follows:
         status_i.tsv = new_status.tsv
         status_i.scrub = new_status.scrub
         status_i.ec = new_status.ec
-        if ( new_status.at != none ) 
-            addr_i = new_addr
-        if ( new_status.iv == 1 ) 
-            info_i = new_info
-        if ( new_status.siv == 1 ) 
-            suppl_info_i = new_suppl_info
-        if ( new_status.tsv == 1 ) 
-            timestamp_i = new_timestamp
+        // Update addr_i, info_i, suppl_info_i, timestam_i appropriately
     endif
 
     status_i.v = 1
