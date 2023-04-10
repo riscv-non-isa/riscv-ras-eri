@@ -200,13 +200,11 @@ determine the records to scan is summarized as follows:
   
 [source, ruby]
 ----
-
     if ( valid_summary.SV == 1 ) { 
         records_to_scan = valid_summary.valid_bitmap;
     } else {
         records_to_scan = (1 << bank_info.n_err_recs) - 1;
     }
-
 ----
 
 ====
