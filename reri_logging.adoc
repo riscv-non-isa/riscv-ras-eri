@@ -202,6 +202,7 @@ determine the records to scan is summarized as follows:
 ----
     records_to_scan = (valid_summary.SV == 1) ?
         valid_summary.valid_bitmap : (1 << bank_info.n_err_recs) - 1;
+----
 
 ====
 
