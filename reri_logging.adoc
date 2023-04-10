@@ -198,11 +198,8 @@ records in the bank are valid. If this bit is 0 then software must read the
 if there is a valid error logged in that error record. The algorithm to
 determine the records to scan is summarized as follows:
 
-[source, ruby]
-----
     records_to_scan = (valid_summary.SV == 1) ?
         valid_summary.valid_bitmap : (1 << bank_info.n_err_recs) - 1;
-----
 
 ====
 
