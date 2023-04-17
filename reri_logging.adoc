@@ -212,13 +212,19 @@ is as follows:
 {reg: [
   {bits: 1,  name: 'else'},
   {bits: 1,  name: 'cece'},
+  {bits: 1,  name: 'sinv'},
+  {bits: 13, name: 'reserved'},
   {bits: 2,  name: 'cee'},
   {bits: 2,  name: 'dee'},
   {bits: 2,  name: 'uee'},
-  {bits: 1,  name: 'sinv'},
-  {bits: 23, name: 'reserved'},
+  {bits: 2,  name: 'c3e'},
+  {bits: 2,  name: 'c4e'},
+  {bits: 2,  name: 'c5e'},
+  {bits: 2,  name: 'c6e'},
+  {bits: 2,  name: 'c7e'},
   {bits: 16, name: 'eid'},
-  {bits: 23, name: 'reserved'},
+  {bits:  8, name: 'reserved'},
+  {bits:  8, name: 'custom'},
 ], config:{lanes: 4, hspace:1024}}
 ....
 
@@ -245,7 +251,7 @@ signaling is disabled.
 ====
 
 The `cee`, `dee`, and `uee` are WARL fields used to enable signaling of UE, DE,
-and CE respectively when they are logged (i.e. when `dcle` is 1). Enables for
+and CE respectively when they are logged (i.e. when `else` is 1). Enables for
 unsupported classes of errors may be hardwired to 0. The encodings of these
 fields are specified in <<ERR_SIG_ENABLES>>.
 
