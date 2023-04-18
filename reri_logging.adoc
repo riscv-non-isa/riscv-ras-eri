@@ -299,14 +299,15 @@ interrupt, or an NMI and the Low-priority RAS signal may be configured to cause
 a Low-priority RAS local interrupt or an external interrupt.
 ====
 
-If the error record supports CE counting then the corrected-error-counting-enable
-(`cece`) field, when set to 1, enables counting CE in the corrected-error-counter
-(CEC). The CEC is a counter that holds an unsigned integer count. When `cece` is 0,
-the CEC does not count and retains its value. If corrected error counting is not
-supported by a hardware unit then `cece` may be hardwired to 0. CEC overflow is
-signaled using the signal configured in the `ces` field. When `cece` is 1, the
-logging of a CE in does not cause an error signal and an error signal configured
-in `ces` occurs only on a CEC overflow.
+If the error record supports corrected-error counting then the
+corrected-error-counting-enable (`cece`) field, when set to 1, enables counting
+corrected errors in the corrected-error-counter (CEC). The CEC is a counter that
+holds an unsigned integer count. When `cece` is 0, the CEC does not count and
+retains its value. If corrected error counting is not supported by a hardware
+unit then `cece` may be hardwired to 0. CEC overflow is signaled using the
+signal configured in the `ces` field. When `cece` is 1, the logging of a CE in
+does not cause an error signal and an error signal configured in `ces` occurs
+only on a CEC overflow.
 
 The `sinv` bit, when written with a value of 1, causes the `v` (valid) field and
 the `ceco` field in `status_i` register to be cleared. The `sinv` field always
@@ -386,11 +387,10 @@ associated with a priority which is a number between 0 and 7; zero being the
 highest priority and 7 being the lowest priority. The `pri` field indicates the
 priority of the currently logged error in the error record.
 
-When an UE occurs the `c` may be set to 1 to indicate that the error has not
+When an error occurs the `c` may be set to 1 to indicate that the error has not
 propagated beyond the boundaries of the hardware unit that detected the error
 and thus may be *containable* through recovery actions (e.g., terminating the
-computation, etc.) carried out by the error recovery handler. The `c` bit is
-valid if an UE is recorded in the error record. 
+computation, etc.) carried out by the error recovery handler.
 
 [NOTE]
 ====
