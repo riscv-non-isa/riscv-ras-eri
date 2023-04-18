@@ -223,13 +223,15 @@ is as follows:
 {reg: [
   {bits: 1,  name: 'else'},
   {bits: 1,  name: 'cece'},
-  {bits: 2,  name: 'cee'},
-  {bits: 2,  name: 'dee'},
-  {bits: 2,  name: 'uee'},
   {bits: 1,  name: 'sinv'},
-  {bits: 23, name: 'reserved'},
+  {bits: 1,  name: 'wpri'},
+  {bits: 2,  name: 'ces'},
+  {bits: 2,  name: 'des'},
+  {bits: 2,  name: 'ues'},
+  {bits: 22, name: 'reserved'},
   {bits: 16, name: 'eid'},
-  {bits: 23, name: 'reserved'},
+  {bits: 8,  name: 'reserved'},
+  {bits: 8,  name: 'custom'},
 ], config:{lanes: 4, hspace:1024}}
 ....
 
@@ -255,8 +257,8 @@ continue to use containment techniques like data poisoning even when logging and
 signaling is disabled.
 ====
 
-The `cee`, `dee`, and `uee` are WARL fields used to enable signaling of UE, DE,
-and CE respectively when they are logged (i.e. when `dcle` is 1). Enables for
+The `ces`, `des`, and `ues` are WARL fields used to enable signaling of UE, DE,
+and CE respectively when they are logged (i.e. when `else` is 1). Enables for
 unsupported classes of errors may be hardwired to 0. The encodings of these
 fields are specified in <<ERR_SIG_ENABLES>>.
 
@@ -302,9 +304,9 @@ If the error record supports CE counting then the corrected-error-counting-enabl
 (CEC). The CEC is a counter that holds an unsigned integer count. When `cece` is 0,
 the CEC does not count and retains its value. If corrected error counting is not
 supported by a hardware unit then `cece` may be hardwired to 0. CEC overflow is
-signaled using the signal configured in the `cee` field. When `cece` is 1, the
+signaled using the signal configured in the `ces` field. When `cece` is 1, the
 logging of a CE in does not cause an error signal and an error signal configured
-in `cee` occurs only on a CEC overflow.
+in `ces` occurs only on a CEC overflow.
 
 The `sinv` bit, when written with a value of 1, causes the `v` (valid) field and
 the `ceco` field in `status_i` register to be cleared. The `sinv` field always
