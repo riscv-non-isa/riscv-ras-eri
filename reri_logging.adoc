@@ -103,7 +103,7 @@ The `vendor_n_imp_id` register is a read-only register and its layout is:
 {reg: [
   {bits: 32, name: 'vendor_id'},
   {bits: 16, name: 'imp_id'},
-  {bits: 16, name: 'reserved'},
+  {bits: 16, name: 'WPRI'},
 ], config:{lanes: 2, hspace:1024}}
 ....
 
@@ -135,7 +135,7 @@ The `bank_info` is a read-only register and its layout is as follows:
 {reg: [
   {bits: 16, name: 'inst_id'},
   {bits: 16, name: 'n_err_recs'},
-  {bits: 24, name: 'reserved'},
+  {bits: 24, name: 'WPRI'},
   {bits:  8, name: 'version'},
 ], config:{lanes: 2, hspace:1024}}
 ....
@@ -224,13 +224,13 @@ is as follows:
   {bits: 1,  name: 'else'},
   {bits: 1,  name: 'cece'},
   {bits: 1,  name: 'sinv'},
-  {bits: 1,  name: 'wpri'},
+  {bits: 1,  name: 'WPRI'},
   {bits: 2,  name: 'ces'},
   {bits: 2,  name: 'des'},
   {bits: 2,  name: 'ues'},
-  {bits: 22, name: 'reserved'},
+  {bits: 22, name: 'WPRI'},
   {bits: 16, name: 'eid'},
-  {bits: 8,  name: 'reserved'},
+  {bits: 8,  name: 'WPRI'},
   {bits: 8,  name: 'custom'},
 ], config:{lanes: 4, hspace:1024}}
 ....
@@ -384,8 +384,8 @@ the error record occur then the `mo` bit is set to indicate the multiple
 occurrence of errors of the same severity.
 
 Each error of an error class that may be logged in an error record are
-associated with a priority which is a number between 0 and 7; zero being the
-highest priority and 7 being the lowest priority. The `pri` field indicates the
+associated with a priority which is a number between 0 and 3; zero being the
+highest priority and 3 being the lowest priority. The `pri` field indicates the
 priority of the currently logged error in the error record.
 
 When an error occurs the `c` may be set to 1 to indicate that the error has not
