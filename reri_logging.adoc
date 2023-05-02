@@ -508,6 +508,10 @@ fields hold valid data and continue to count even when the `v` field is 0.
 
 [NOTE]
 ====
+It is recommended that if the `status_i` register is written when `v=1`, the
+register accept the write only to the `cec` field and preserve the value held
+in other fields of the register.
+
 Some hardware units may maintain a history of CE and may report a CE and
 increment the `cec` only if the error is not identical to a previously reported
 CE.
