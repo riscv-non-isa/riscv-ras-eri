@@ -348,22 +348,23 @@ the hardware unit.
 ....
 {reg: [
   {bits: 1,  name: 'v'},
-  {bits: 1,  name: 'mo'},
   {bits: 1,  name: 'ce'},
   {bits: 1,  name: 'de'},
   {bits: 1,  name: 'ue'},
-  {bits: 3,  name: 'pri'},
+  {bits: 2,  name: 'pri'},
+  {bits: 1,  name: 'mo'},
   {bits: 1,  name: 'c'},
   {bits: 3,  name: 'tt'},
-  {bits: 4,  name: 'at'},
   {bits: 1,  name: 'iv'},
+  {bits: 4,  name: 'at'},
   {bits: 1,  name: 'siv'},
   {bits: 1,  name: 'tsv'},
+  {bits: 2,  name: 'WPRI'},
   {bits: 1,  name: 'scrub'},
   {bits: 1,  name: 'ceco'},
-  {bits: 3,  name: 'WPRI'},
+  {bits: 2,  name: 'WPRI'},
   {bits: 8,  name: 'ec'},
-  {bits: 16, name: 'reserved'},
+  {bits: 16, name: 'WPRI'},
   {bits: 16, name: 'cec'},
 ], config:{lanes: 4, hspace:1024}}
 ....
