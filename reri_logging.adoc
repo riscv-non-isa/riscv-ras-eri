@@ -103,7 +103,7 @@ The `vendor_n_imp_id` register is a read-only register and its layout is:
 {reg: [
   {bits: 32, name: 'vendor_id'},
   {bits: 16, name: 'imp_id'},
-  {bits: 16, name: 'reserved'},
+  {bits: 16, name: 'WPRI'},
 ], config:{lanes: 2, hspace:1024}}
 ....
 
@@ -135,7 +135,7 @@ The `bank_info` is a read-only register and its layout is as follows:
 {reg: [
   {bits: 16, name: 'inst_id'},
   {bits: 16, name: 'n_err_recs'},
-  {bits: 24, name: 'reserved'},
+  {bits: 24, name: 'WPRI'},
   {bits:  8, name: 'version'},
 ], config:{lanes: 2, hspace:1024}}
 ....
@@ -224,13 +224,13 @@ is as follows:
   {bits: 1,  name: 'else'},
   {bits: 1,  name: 'cece'},
   {bits: 1,  name: 'sinv'},
-  {bits: 1,  name: 'wpri'},
+  {bits: 1,  name: 'WPRI'},
   {bits: 2,  name: 'ces'},
   {bits: 2,  name: 'des'},
   {bits: 2,  name: 'ues'},
-  {bits: 22, name: 'reserved'},
+  {bits: 22, name: 'WPRI'},
   {bits: 16, name: 'eid'},
-  {bits: 8,  name: 'reserved'},
+  {bits: 8,  name: 'WPRI'},
   {bits: 8,  name: 'custom'},
 ], config:{lanes: 4, hspace:1024}}
 ....
@@ -257,8 +257,8 @@ continue to use containment techniques like data poisoning even when logging and
 signaling is disabled.
 ====
 
-The `ces`, `des`, and `ues` are WARL fields used to enable signaling of UE, DE,
-and CE respectively when they are logged (i.e. when `else` is 1). Enables for
+The `ces`, `des`, and `ues` are WARL fields used to enable signaling of CE, DE,
+and UE respectively when they are logged (i.e. when `else` is 1). Enables for
 unsupported classes of errors may be hardwired to 0. The encodings of these
 fields are specified in <<ERR_SIG_ENABLES>>.
 
@@ -279,8 +279,8 @@ information carried by the signal is `UNSPECIFIED` by this specification.
 
 [NOTE]
 ====
-The error signaling enables default to 0 - disabled - at reset to allow a RAS
-handler an opportunity to initialize itself for handling RAS signals and to
+The error signaling enables typically default to 0 - disabled - at reset to allow
+a RAS handler an opportunity to initialize itself for handling RAS signals and to
 initialize the hardware units that generate the RAS signals before error logging
 and signaling is enabled.
 
@@ -348,22 +348,23 @@ the hardware unit.
 ....
 {reg: [
   {bits: 1,  name: 'v'},
-  {bits: 1,  name: 'mo'},
   {bits: 1,  name: 'ce'},
   {bits: 1,  name: 'de'},
   {bits: 1,  name: 'ue'},
-  {bits: 3,  name: 'pri'},
+  {bits: 2,  name: 'pri'},
+  {bits: 1,  name: 'mo'},
   {bits: 1,  name: 'c'},
   {bits: 3,  name: 'tt'},
-  {bits: 4,  name: 'at'},
   {bits: 1,  name: 'iv'},
+  {bits: 4,  name: 'at'},
   {bits: 1,  name: 'siv'},
   {bits: 1,  name: 'tsv'},
+  {bits: 2,  name: 'WPRI'},
   {bits: 1,  name: 'scrub'},
   {bits: 1,  name: 'ceco'},
-  {bits: 3,  name: 'WPRI'},
+  {bits: 2,  name: 'WPRI'},
   {bits: 8,  name: 'ec'},
-  {bits: 16, name: 'reserved'},
+  {bits: 16, name: 'WPRI'},
   {bits: 16, name: 'cec'},
 ], config:{lanes: 4, hspace:1024}}
 ....
@@ -383,8 +384,8 @@ the error record occur then the `mo` bit is set to indicate the multiple
 occurrence of errors of the same severity.
 
 Each error of an error class that may be logged in an error record are
-associated with a priority which is a number between 0 and 7; zero being the
-highest priority and 7 being the lowest priority. The `pri` field indicates the
+associated with a priority which is a number between 0 and 3; zero being the
+highest priority and 3 being the lowest priority. The `pri` field indicates the
 priority of the currently logged error in the error record.
 
 When an error occurs the `c` may be set to 1 to indicate that the error has not
@@ -507,6 +508,10 @@ fields hold valid data and continue to count even when the `v` field is 0.
 
 [NOTE]
 ====
+It is recommended that if the `status_i` register is written when `v=1`, the
+register accept the write only to the `cec` field and preserve the value held
+in other fields of the register.
+
 Some hardware units may maintain a history of CE and may report a CE and
 increment the `cec` only if the error is not identical to a previously reported
 CE.
