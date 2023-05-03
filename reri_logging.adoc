@@ -309,9 +309,9 @@ signal configured in the `ces` field. When `cece` is 1, the logging of a CE in
 does not cause an error signal and an error signal configured in `ces` occurs
 only on a CEC overflow.
 
-The `sinv` bit, when written with a value of 1, causes the `v` (valid) field and
-the `ceco` field in `status_i` register to be cleared. The `sinv` field always
-returns 0 on read.
+The `sinv` bit, when written with a value of 1, causes the `v` (valid) field 
+field in `status_i` register to be cleared. The `sinv` field always returns 0
+on read.
 
 The error injection delay (`eid`) field is used to control error record
 injection. When `eid` is written with a value greater than 1, the `eid` starts
@@ -508,9 +508,10 @@ fields hold valid data and continue to count even when the `v` field is 0.
 
 [NOTE]
 ====
-It is recommended that if the `status_i` register is written when `v=1`, the
-register accept the write only to the `cec` field and preserve the value held
-in other fields of the register.
+It is recommended that if the `status_i` register discard explicit writes when
+`v=1`. Before performing an explicit write, for example to reset the `cec`,
+software should first clear the valid bit (if set) using `control_i.sinv` and
+then read the register to determine if the write was accepted.
 
 Some hardware units may maintain a history of CE and may report a CE and
 increment the `cec` only if the error is not identical to a previously reported
