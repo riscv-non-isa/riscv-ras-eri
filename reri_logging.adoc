@@ -301,31 +301,37 @@ a Low-priority RAS local interrupt or an external interrupt.
 
 If the error record supports corrected-error counting then the
 corrected-error-counting-enable (`cece`) field, when set to 1, enables counting
-corrected errors in the corrected-error-counter (CEC). The CEC is a counter that
-holds an unsigned integer count. When `cece` is 0, the CEC does not count and
-retains its value. If corrected error counting is not supported by a hardware
-unit then `cece` may be hardwired to 0. CEC overflow is signaled using the
-signal configured in the `ces` field. When `cece` is 1, the logging of a CE in
-does not cause an error signal and an error signal configured in `ces` occurs
-only on a CEC overflow.
+corrected errors in the corrected-error-counter (`cec`) field of the status
+register `status_i` of the error record. The `cec` is a counter that holds an
+unsigned integer count. When `cece` is 0, the `cec` does not count and retains
+its value. If corrected error counting is not supported in the error record then
+`cece` and `cec` may be hardwired to 0. An overflow of `cec` is signaled using
+the signal configured in the `ces` field. When `cece` is 1, the logging of a CE
+in the error record does not cause an error signal and an error signal
+configured in `ces` occurs only on a `cec` overflow.
 
 The `sinv` bit, when written with a value of 1, causes the `v` (valid) field 
 field in `status_i` register to be cleared. The `sinv` field always returns 0
 on read.
 
-The error injection delay (`eid`) field is used to control error record
+The error-record-injection-delay (`eid`) field is used to control error record
 injection. When `eid` is written with a value greater than 1, the `eid` starts
-counting down, at an implementation defined rate, till the value reaches a count
-of 0. Writing a value of 0 disables the counter. If error injection is not
-supported by the error record then the `eid` field may be hardwired to 0. When
-`eid` reaches a count of 0, the status register is made valid by setting the
-`status_i.v` bit to 1. The `status_i.v` transition from 0 to 1 generates a RAS
-signal corresponding to the type of error setup in the `status_i` register. The
-counter continues to count even if the `status_i` register was overwritten by a
-hardware detected error before the `eid` counts down to 0. 
+counting down, at an implementation defined rate, till the count reaches a value
+of 0. Writing a value of 0 to `eid` disables the counter. If error record
+injection is not supported by the error record then the `eid` field may be
+hardwired to 0. When `eid` reaches a value of 0, the status register of the
+error record is made valid by setting the `status_i.v` bit to 1. The transition
+of `status_i.v` from 0 to 1 generates a signal corresponding to the type of
+error setup in the `status_i` register. The counter continues to count even if
+the `status_i` register was overwritten by a hardware detected error before the
+`eid` counts down to 0.
 
 [NOTE]
 ====
+Software may setup the error record registers with desired values of the error
+record to be injected and then program `eid` to cause the `status_i` register to
+be marked valid when `eid` count reaches 0.
+
 The error record injection capability only injects an error record and not an
 error into the hardware itself. The error record injection capability is
 expected to be used to test the RAS handlers and is not intended to be used for
