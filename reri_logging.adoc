@@ -311,7 +311,7 @@ in the error record does not cause an error signal and an error signal
 configured in `ces` occurs only on a `cec` overflow.
 
 The `sinv` bit, when written with a value of 1, causes the `v` (valid) field 
-field in `status_i` register to be cleared. The `sinv` field always returns 0
+in the `status_i` register to be cleared. The `sinv` field always returns 0
 on read.
 
 The error-record-injection-delay (`eid`) field is used to control error record
