@@ -310,21 +310,32 @@ the signal configured in the `ces` field. When `cece` is 1, the logging of a CE
 in the error record does not cause an error signal and an error signal
 configured in `ces` occurs only on a `cec` overflow.
 
-The `sinv` bit, when written with a value of 1, causes the `v` (valid) field 
-in the `status_i` register to be cleared. The `sinv` field always returns 0
-on read.
+The status-register-invalidate (`sinv`) bit, when written with a value of 1,
+causes the `v` (valid) field of the associated `status_i` register to be
+cleared. The `sinv` field always returns 0 on read. The `sinv` bit enables
+software to read out and invalidate an error record without needing to
+explicitly write the `status_i` register.
 
-The error-record-injection-delay (`eid`) field is used to control error record
-injection. When `eid` is written with a value greater than 1, the `eid` starts
-counting down, at an implementation defined rate, until the count reaches a value
-of 0. Writing a value of 0 to `eid` disables the counter. If error record
-injection is not supported by the error record then the `eid` field may be
-hardwired to 0. When `eid` reaches a value of 0, the status register of the
-error record is made valid by setting the `status_i.v` bit to 1. The transition
-of `status_i.v` from 0 to 1 generates a signal corresponding to the type of
-error setup in the `status_i` register. The counter continues to count even if
-the `status_i` register was overwritten by a hardware detected error before the
-`eid` counts down to 0.
+[NOTE]
+====
+Software may determine if the error record was read atomically by first reading
+the registers of the error record, then clearing the valid in `status_i` by
+writing 1 to `control_i.sinv` and then reading the `status_i` register again to
+determine if the value (besides the `v` field) changed. If a change was detected
+then the process may be repeated to read the latest reported error.
+====
+
+The error-injection-delay (`eid`) is a WARL field used to control error record
+injection. When `eid` is written with a value greater than 0, the `eid` starts
+counting down, at an implementation defined rate, till the value reaches a count
+of 0. Writing a value of 0 disables the counter. If error injection is not
+supported by the error record then the `eid` field may be hardwired to 0. When
+`eid` reaches a count of 0, the status register is made valid by setting the
+`status_i.v` bit to 1. The `status_i.v` transition from 0 to 1 generates a RAS
+signal corresponding to the class of error (CE, DE, or UE) setup in the
+`status_i` register. The counter continues to count even if the `status_i`
+register was overwritten by a hardware detected error before the `eid` counts
+down to 0.
 
 [NOTE]
 ====
@@ -377,8 +388,8 @@ the hardware unit.
 
 The error record holds a valid error log if the `v` field is 1.
 
-If the detected error was deferred then `de` is set to 1. If the detected error
-was corrected then `ce` is set to 1. If the detected error could not be corrected
+If the detected error was corrected then `ce` is set to 1. If the detected error
+was deferred then `de` is set to 1. If the detected error could not be corrected
 or deferred and thus needs urgent handling by an error handler, then the `ue` bit
 is set to 1. If the error record does not log a class of errors (e.g., does not
 support DE), then the corresponding bit may be hardwired to 0. If the bits
@@ -386,26 +397,53 @@ corresponding to more than one error class are set to 1 then the error record
 holds information about the highest severity error class among the bits set.
 
 When `v` is 1, if more errors of the same class as the error currently logged in
-the error record occur then the `mo` bit is set to indicate the multiple
-occurrence of errors of the same severity.
+the error record occur then the multiple-occurence (`mo`) bit is set to indicate
+the multiple occurrence of errors of the same severity. See <<OVERWRITE_RULES>>
+for rules on overwriting the error record in such cases.
 
-Each error of an error class that may be logged in an error record is
-associated with a priority which is a number between 0 and 3; zero being the
-highest priority and 3 being the lowest priority. The `pri` field indicates the
-priority of the currently logged error in the error record.
+Each error of an error class (CE, DE, or UE) that may be logged in an error
+record may be associated with a priority which is a number between 0 and 3;
+priority value of 3 being the highest priority and priority value of 0 being the
+lowest priority. The priority values indicate relative priority among errors of
+the same error class. Among errors of different error classes the priority
+values are unrelated.
 
-When an error occurs the `c` may be set to 1 to indicate that the error has not
-propagated beyond the boundaries of the hardware unit that detected the error
-and thus may be *containable* through recovery actions (e.g., terminating the
-computation, etc.) carried out by the error recovery handler.
+[NOTE]
+====
+Some implementations may report errors from more than one sources into a
+single error records. Such implementations may prioritize reporting of error
+from one source over the other using the `pri` associated with the error when
+both sources simultaneously detect an error of the same class (e.g., CE). The
+priority is also used to determine if a new error may overwrite a previously
+reported error of the same error class in the error record.
+====
+
+The `pri` field in the error record indicates the priority of the currently
+logged error in the error record. The `pri` is a WARL field and an
+implementation may support only a subset of legal values for this field and
+an implementation that does not support reporting of a priority per error may
+hardwire this field to 0.
+
+The error record overwrite rules use the error class (CE, DE, or UE) and the
+error priority (`pri`) as specified in <<OVERWRITE_RULES>>.
+
+When an error occurs the containable (`c`) bit may be set to 1 to indicate
+that the error has not propagated beyond the boundaries of the hardware unit
+that detected the error and thus may be *containable* through recovery actions
+(e.g., terminating the computation, etc.) carried out by the error recovery
+handler. The `c` bit is WARL.
 
 [NOTE]
 ====
 For example, a RISC-V hart by causing the precise data corruption exception on
 attempts to consume corrupted/poisoned data may contain the error to the program
-currently executing on the hart. A RISC-V RERI by aborting the transaction that
-caused the corrupted data from being consumed may contain the error to the device
-initiating the transaction, etc.
+currently executing on the hart. Such errors may be reported with the `c` bit
+set to 1.
+
+For example, A RISC-V IOMMU by aborting the memory read transaction that caused
+the corrupted data from being consumed may contain the error to the device
+initiating the transaction, etc. Such errors may be reported with the `c` bit
+set to 1.
 
 While the `c` bit indicates that the error may be containable the RAS handler
 may or may not be able to recover the system from such errors. The RAS handler
@@ -414,9 +452,10 @@ the error record such as the address of the memory where corruption was
 detected, etc.
 ====
 
-The address-type (`at`) field indicates the type of address reported in the
-`addr_i` register. A error record that does not report addresses may hardwire
-this field to 0. The encodings of the `at` field are listed in <<AT_ENCODINGS>>.
+The address-type (`at`) is a WARL field indicates the type of address reported
+in the `addr_i` register. A error record that does not report addresses may
+hardwire this field to 0. The encodings of the `at` field are listed in
+<<AT_ENCODINGS>>.
 
 [[AT_ENCODINGS]]
 .Address type encodings
@@ -446,9 +485,10 @@ the address (e.g., cache set and way, etc.) may be reported in the `info_i`
 register.
 ====
 
-The `tt` field reports the type of transaction that detected the error and its
-encodings are listed in <<TT_ENCODINGS>>. A error record that does not report
-transaction types may hardwire this field to 0.
+The transaction-type (`tt`) is a WARL field to report the type of transaction
+that detected the error and its encodings are listed in <<TT_ENCODINGS>>. An
+error record that does not report transaction types may hardwire this field
+to 0.
 
 [[TT_ENCODINGS]]
 .Transaction type encodings
@@ -456,38 +496,50 @@ transaction types may hardwire this field to 0.
 |===
 | *Encoding* | *Description*
 | 0          | Unspecified or not applicable.
-| 1-3        | Reserved for future standard extensions.
+| 1          | Designated for custom use.
+| 2-3        | Reserved for future standard use.
 | 4          | Explicit read.
 | 5          | Explicit write.
-| 4          | Implicit read.
-| 5          | Implicit write.
+| 6          | Implicit read.
+| 7          | Implicit write.
 |===
 
 [NOTE]
 ====
-Implicit read and write are accesses that may be implicitly performed by
-hardware to perform an explicit operation. For example, a load or store
-instruction executed by the hart may perform implicit memory accesses to page
-table data structures. As another example, processing a memory transaction
-may require a fabric component to implicitly access a routing table data
-structure.
+Implementations may report additional information about the transaction (e.g.,
+whether speculative, on-demand vs. prefetch, etc.) in the `info_i` and/or
+`suppl_info_i` registers.
 
-Instruction memory accesses by a hart are termed as implicit accesses by the
-hart. However for the purposes of error logging only the implicit accesses to
-data structures like the page tables and guest page tables used to determine the
-address of the instruction to fetch are termed as implicit accesses. The read to
-fetch the instruction bytes themselves are termed as explicit reads.
+For a RISC-V hart, the Privileged specification defines memory accesses by
+instructions as either explicit or implicit. Implicit read and write are
+accesses that may be implicitly performed by hardware to perform an explicit
+operation. For example, a load or store instruction executed by the hart may
+perform implicit memory accesses to page table data structures. Instruction
+memory accesses by a hart are termed as implicit accesses by the Privileged
+specification. However for the purposes of error logging only the implicit
+accesses to data structures like the (guest) page tables used to determine the
+address of the instruction to fetch are termed as implicit accesses. The
+read to fetch the instruction bytes themselves are termed as explicit reads.
+
+A non-hart component may also perform implicit accesses in order to process an
+explicit transaction. For example, processing a memory transaction may require
+a fabric component to implicitly access a routing table data structure.
 ====
 
 If the detected error reports additional information in the `info_i` register
-then the `iv` field is set to 1. If the detected error reports additional
-supplemental information in the `suppl_info_i` register then the `siv` field is
-set to 1. The `iv` and/or `siv` fields may be hardwired to 0 if the error record
-does not provide information in the `info_i` and/or `suppl_info_i` registers.
+then information-valid (`iv`) field is set to 1. If the detected error reports
+additional supplemental information in the `suppl_info_i` register then
+supplemental-information-valid (`siv`) field is set to 1. The `iv` and/or `siv`
+fields may be hardwired to 0 if the error record does not provide information in
+`info_i` and/or `suppl_info_i` registers. When `iv` is 0, the value in `info_i`
+register is `UNSPECIFIED`. When `siv` is 0, the value in `suppl_info_i` register
+is `UNSPECIFIED`.
 
 If the error record holds a timestamp of when the last error was logged in the
-`timestamp_i` register then the `tsv` bit is set to 1. This field may be
-hardwired to 0 if the error record does not report a timestamp with the error.
+`timestamp_i` register then the timestamp-valid (`tsv`) field is set to 1. This
+field may be hardwired to 0 if the error record does not report a timestamp with
+the error. When `tsv` field is 0, the value in `timestamp_i` register is
+`UNSPECIFIED`.
 
 The `scrub` bit is valid when a CE is logged and when set to 1 indicates that
 the storage location that held the data value has been updated with the
@@ -497,51 +549,43 @@ storage elements (e.g., correcting errors detected on bus transactions) this
 field may be hardwired to 0. If this property is unconditionally true for a
 hardware unit then this field may be hardwired to 1.
 
-The `ec` field holds an error code that provides a description of the detected
-error. Standard `ec` encodings are defined in <<EC_ENCODINGS>>. If an error
-record detects an error that does not correspond to a standard `ec` encoding
-then it may report the error using a custom encoding. The custom encodings
-have the most significant bit set to 1 to differentiate them from the standard
-encodings.
+The error-code (`ec`) is a WARL field holds an error code that provides a
+description of the detected error. Standard `ec` encodings are defined in
+<<EC_ENCODINGS>>. If an error record detects an error that does not correspond
+to a standard `ec` encoding then such errors may be reported using a custom
+encoding. The custom encodings have the most significant bit set to 1 to
+differentiated them from the standard encodings.
 
 An error record that supports the 1 setting of the `cece` field in `control_i`,
-implements a 16-bit wide corrected-error-counter in the `cec` field. When
-`cece` is 1, the `cec` is incremented on each CE in addition to logging details
-of the error in the error record registers. If an integer overflow occurs on
-`cec` increment then the corrected-error-counter-overflow (`ceco`) field is set
-to 1. The `cec` continues to count following an overflow. The `cec` and `ceco`
-fields hold valid data and continue to count even when the `v` field is 0.
+implements a corrected-error-counter in the `cec` field. The `cec` is a WARL
+field. When `cece` is 1, the `cec` is incremented on each CE in addition to
+logging details of the error in the error record registers. If an unsigned
+integer overflow occurs on an `cec` increment then the
+corrected-error-counter-overflow (`ceco`) field is set to 1. The `cec`
+continues to count following an overflow. The `cec` and `ceco` fields hold valid
+data and continue to count even when the `v` field is 0.
 
 [NOTE]
 ====
-It is recommended that if the `status_i` register discard explicit writes when
-`v=1`. Before performing an explicit write, for example to reset the `cec`,
-software should first clear the valid bit (if set) using `control_i.sinv` and
-then read the register to determine if the write was accepted.
-
 Some hardware units may maintain a history of CE and may report a CE and
 increment the `cec` only if the error is not identical to a previously reported
 CE.
 
 Some hardware units may implement low pass filters (e.g., leaky buckets) that
 throttle the rate which CE are reported and counted.
+
+It is recommended that if the `status_i` register discard explicit writes when
+`v=1`. Before performing an explicit write, for example to reset the `cec`,
+software should first clear the valid bit (if set) using `control_i.sinv` and
+then read the register to determine if the write was accepted.
 ====
 
-When a UE or DE error is logged the `cec` and `ceco` fields are not modified
-and retain their values. 
-
-[NOTE]
-====
-Software may determine if the error record was read atomically by first reading
-the registers of the error record, then clearing the valid bit in `status_i` by
-writing 1 to `control_i.sinv` and then reading the `status_i` register again to
-determine if the value (aside from the `v` field) changed. If a change was
-detected then the process may be repeated to read the latest reported error.
-====
+When a UE or DE error is logged in an error record the `cec` and `ceco` fields
+of the error record are not modified and retain their values.
 
 ==== Address register (`addr_i`)
 
-The `addr_i` is a WARL register that reports the address associated with the
+The `addr_i` WARL register reports the address associated with the
 detected error when `status_i.at` is not 0. If `status_i.at` is 0, the value in
 this register is `UNSPECIFIED`. An implementation that does not report addresses
 may hardwire this register to 0. Some fields of the register may be hardwired to
@@ -554,7 +598,7 @@ depending on the type of address reported.
 
 ==== Information register (`info_i`)
 
-The `info_i` field provides additional information about the error when
+The `info_i` WARL register provides additional information about the error when
 `status_i.iv` is 1. If `status_i.iv` is 0, the value in this register is
 `UNSPECIFIED`. An implementation that does not report any additional
 information may hardwire this register to 0.
@@ -578,15 +622,16 @@ replacement units may log additional information in the `info_i` register to
 help identify the failing component. For example, a memory controller may log
 the memory channel associated with the error such as the DIMM channel, bank,
 column, row, rank, subRank, device ID, etc. 
+
 ====
 
 ==== Supplemental information register (`suppl_info_i`)
 
-The `suppl_info_i` field provides additional information about the error when
-`status_i.siv` is 1. This information may supplement the information provided
-in `info_i` register. If `status_i.siv` is 0, the value in this register is
-`UNSPECIFIED`. An implementation that does not report any supplemental
-information may hardwire this register to 0.
+The `suppl_info_i` WARL register provides additional information about the error
+when `status_i.siv` is 1. This information may supplement the information
+provided in `info_i` register. If `status_i.siv` is 0, the value in this
+register is `UNSPECIFIED`. An implementation that does not report any
+supplemental information may hardwire this register to 0.
 
 The format of the register is `UNSPECIFIED` by this specification. This field
 may be interpreted using the error code in `status_i.ec` along with
@@ -594,14 +639,15 @@ implementation specific and implementation defined format and rules.
 
 ==== Timestamp register (`timestamp_i`)
 
-The `timestamp_i` field provides a timestamp for the last error recorded in the
-error record if `status_i.tsv` is 1. When `status.tsv` is 0, the value in this
-register is `UNSPECIFIED`. An implementation that does not report a timestamp
-may hardwire this register to 0. Some fields of the register may be hardwired
-to zero if the field is unused to report the timestamp.
+The `timestamp_i` WARL register provides a timestamp for the last error recorded
+in the error record if `status_i.tsv` is 1. When `status.tsv` is 0, the value in
+this register is `UNSPECIFIED`. An implementation that does not report a
+timestamp may hardwire this register to 0. Some fields of the register may be
+hardwired to zero if the field is unused to report the timestamp.
 
 The frequency and resolution of the timestamp are `UNSPECIFIED`.
 
+[[OVERWRITE_RULES]]
 === Error record overwrite rules
 
 When a hardware unit detects an error it may find its error record still valid
@@ -612,8 +658,8 @@ error. UE has the highest severity, followed by DE, and then CE. When the two er
 have same severity the priority of the errors is used to determine if the error
 record is overwritten. Higher priority errors overwrite the lower priority
 errors. When a error record is overwritten by a higher severity error (DE/CE by
-UE, DE by UE, or CE by DE), the status bits indicating the severity of the first
-error are retained (i.e., are sticky). 
+UE, DE by UE, or CE by DE), the status bits indicating the severity of the older
+errors are retained (i.e., are sticky).
 
 The rules for writing the error record are as follows:
 
@@ -668,10 +714,10 @@ The rules for writing the error record are as follows:
     status_i.v = 1
 ----
     
-When the `status_i.MO` is 1, if the logged error is a UE then the recovery
-handler should restart the system to bring it to a correct state as an UE record
-has been lost. If the `status_i.MO` is 1 and the logged error is a DE or a CE
-then the recovery handler may keep the system operational.
+If the `status_i.mo` is 1 and the logged error is a UE then the RAS handler
+should preferably restart the system to bring it to a correct state as an UE
+record has been lost. If the `status_i.mo` is 1 and the logged error is a DE
+or a CE then the recovery handler may keep the system operational.
 
 A 0 to 1 transition of the `status_i.v` causes the signal configured in the
 `control_i` register for the highest severity error recorded in the error record
