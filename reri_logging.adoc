@@ -8,7 +8,7 @@ records. One or more error records may be valid at any instance of time due to
 one or more hardware units in the component detecting an error or due to a
 hardware unit having detected one or more errors.
 
-Each error bank is memory-mapped and are located within a naturally aligned
+Each error bank is memory-mapped and is located within a naturally aligned
 4-KiB region (a page) of physical address space that exists for each error bank,
 i.e., one page per bank. Each error bank may include up to 63 error records.
 Each error record is a set of registers used to control that error record and to
@@ -16,7 +16,7 @@ report status, address, and other information relevant to the error recorded in
 that error record.
 
 The behavior for register accesses where the address is not aligned to
-the size of the access, or if the access spans multiple registers, of if the
+the size of the access, or if the access spans multiple registers, or if the
 size of the access is not 4 bytes or 8 bytes, is `UNSPECIFIED`. The atomicity of
 access to an 8 byte register is `UNSPECIFIED`. An aligned 4 byte access to a
 RERI register must be single-copy atomic.
@@ -34,7 +34,7 @@ of instructions.
 
 An implementation-specific response occurs if the error bank and/or record is
 unavailable (e.g., powered down) to memory-mapped accesses. For example, an
-error bank and/or record  may respond with all zero data on reads and may
+error bank and/or record may respond with all zero data on reads and may
 ignore writes. Other implementations may for example, signal a error response on
 the attempted transaction.
 
@@ -46,8 +46,8 @@ the page.
 
 The error bank registers are organized as a 64-byte header providing information
 about the error bank followed by an array of 64-byte error records. The offset
-of error record numbered `i` in the bank is (64 + `i` * 64) where `i` may range
-from 0 to 62.
+of the error record numbered `i` in the bank is (64 + `i` * 64) where `i` may
+range from 0 to 62.
 
 .Error bank Memory-mapped register layout
 [width=100%]
@@ -121,7 +121,7 @@ surrounding system.
 [NOTE]
 ====
 The `vendor_id` and the `imp_id` are expected to be used as a identifier to
-determine the format of fields and encodings that `UNSPECIFIED` by this
+determine the format of fields and encodings that are `UNSPECIFIED` by this
 specification.
 ====
 
@@ -263,7 +263,7 @@ unsupported classes of errors may be hardwired to 0. The encodings of these
 fields are specified in <<ERR_SIG_ENABLES>>.
 
 [[ERR_SIG_ENABLES]]
-.Error signaling enable filed encodings
+.Error signaling enable field encodings
 [cols="^1,3", options="header"]
 |===
 | *Encoding* | *Error signal*
@@ -336,7 +336,6 @@ signal corresponding to the class of error (CE, DE, or UE) setup in the
 `status_i` register. The counter continues to count even if the `status_i`
 register was overwritten by a hardware detected error before the `eid` counts
 down to 0.
-=======
 
 [NOTE]
 ====
@@ -387,7 +386,7 @@ the hardware unit.
 ], config:{lanes: 4, hspace:1024}}
 ....
 
-The error record hold a valid error log if the `v` field is 1.
+The error record holds a valid error log if the `v` field is 1.
 
 If the detected error was corrected then `ce` is set to 1. If the detected error
 was deferred then `de` is set to 1. If the detected error could not be corrected
@@ -473,7 +472,7 @@ hardwire this field to 0. The encodings of the `at` field are listed in
 
 [NOTE]
 ====
-The component specific address type may be used to report addresses such as a
+The component specific address types may be used to report addresses such as a
 local bus address, a DRAM address, etc. The interpretation of such addresses is
 component specific.
 
@@ -544,7 +543,7 @@ the error. When `tsv` field is 0, the value in `timestamp_i` register is
 
 The `scrub` bit is valid when a CE is logged and when set to 1 indicates that
 the storage location that held the data value has been updated with the
-corrected value (i.e., the data has been scrubbed). An implementation that
+corrected value (i.e., the data has been scrubbed). In an implementation that
 cannot make this distinction or where the error record is not associated with
 storage elements (e.g., correcting errors detected on bus transactions) this
 field may be hardwired to 0. If this property is unconditionally true for a
@@ -584,7 +583,6 @@ then read the register to determine if the write was accepted.
 When a UE or DE error is logged in an error record the `cec` and `ceco` fields
 of the error record are not modified and retain their values.
 
-
 ==== Address register (`addr_i`)
 
 The `addr_i` WARL register reports the address associated with the
@@ -593,8 +591,8 @@ this register is `UNSPECIFIED`. An implementation that does not report addresses
 may hardwire this register to 0. Some fields of the register may be hardwired to
 zero if the field is unused to report any type of address. In general, to the
 extent possible, the error record should capture all significant parts of the
-address. However, as a function of the type of error being logged, some address
-fields may be zeroes. Some highest address bits may be fixed or may be
+address. However as a function of the type of error being logged some address
+fields may be zeroes. Some of the highest address bits may be fixed or may be
 sign-extensions or may be zero-extensions of the next lowest address bit
 depending on the type of address reported.
 
@@ -612,11 +610,12 @@ implementation specific and implementation defined format and rules.
 [NOTE]
 ====
 This field may be used to report error specific information to help locate the
-failing component, guide recovery actions, whether error is transient or
-permanent, etc. The field may be used to report more detailed information about
-the location of the error within the component. For example, set and way where
-the error was detected, the parity group that was in error, the ECC syndrome,
-a protocol FSM state, the input that caused an assertion to fail, etc. 
+failing component, guide recovery actions, determine whether the error is
+transient or permanent, etc. The field may be used to report more detailed
+information about the location of the error within the component, for example,
+the set and way where the error was detected, the parity group that was in error,
+the ECC syndrome, a protocol FSM state, the input that caused an assertion to
+fail, etc.
 
 Components that are field replaceable units or detect errors in connected field
 replacement units may log additional information in the `info_i` register to
@@ -728,8 +727,8 @@ to be generated.
 
 Standards such as PCIe and CXL define standardized error logging architectures
 such as the PCIe Advanced Error Reporting (AER). Specifications such as CXL
-define a standardized set of RAS requirements to be complied to by host and
-devices. The RISC-V RERI extension complements the error reporting architecture
+define a standardized set of RAS requirements for hosts and devices to comply to.
+The RISC-V RERI extension complements the error reporting architecture
 defined by these standards with a RISC-V standard for reporting errors for
 components that are not PCIe/CXL components. There may also be other error
 logging mechanisms, possibly custom, that are employed alongside the RERI
