@@ -45,9 +45,9 @@ incorporate methods to detect occurrence of errors and to signal the errors to
 the consumers of the service.
 
 Availability of a system as a function of time is the probability that the
-system provides the expected service and is a measure of tolerance of errors.
-Systems may increase the availability by minimizing the impact of the errors in
-one part of the system to the rest of the system. These may be achieved by means
+system provides the expected service and is a measure of tolerance to errors.
+Systems may increase their availability by minimizing the impact of the errors in
+one part of the system to the rest of the system. This may be achieved by means
 such as error correction, redundancy, state checkpoints and rollbacks, error
 prediction, and error containment.
 
@@ -58,10 +58,10 @@ repair and bring the system back online.
 
 === Faults and Errors
 
-Fault is an incorrect state resulting from failures of components or due to
+A fault is an incorrect state resulting from failures of components or due to
 interference from the environment in which the system operates. A fault is
 permanent if it reflects an irreversible change to the observable system state
-else the fault is transient. A permanent fault may occur due to a physical
+and is transient otherwise. A permanent fault may occur due to a physical
 defect or due to a flaw in the design of the functions implementing the service
 itself. A transient fault may occur due to temporary environmental conditions
 (cosmic rays, voltage glitches, etc.) or due to instability (e.g. marginal
@@ -153,10 +153,10 @@ point in time if the data corrupted by the error is consumed. Defering errors
 allows deferring the error handling to an ultimate consumer of the corrupted
 data that may be able to provide more precise information to an error handler
 about the contexts affected by the corruption and thus enable more precise error
-recover actions by the erro handler. The component that detected and deferred
-the error may signal an error recovery handler by logging the DE but such DE
+recover actions by the error handler. The component that detected and deferred
+the error may signal an error recovery handler by logging the DE but such a DE
 does not need an immediate remedial action to be performed by the error handler.
-For example, a memory controller may detect an uncorrectable ECC error on a
+For example, a memory controller may detect an uncorrectable ECC error on
 data in memory but since there is no immediate consumer of the data the memory
 controller may just mark the data as poisoned and defer the error handling to a
 component that requests the data. If the poisoned data is never consumed then
