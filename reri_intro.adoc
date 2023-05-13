@@ -71,10 +71,7 @@ Some faults that occur in a component may be dormant and only affect the
 internal state of the component. Such dormant faults however may turn into
 active faults when that internal state is used by the computation process in
 that component and produce an error. An error is detected when its presence is
-indicated by an error message or signal. Malicious software, especially software
-operating at privileged modes of operation of the system, may attempt to cause
-errors; the RAS capabilities are designed to prevent such software-induced
-errors.
+indicated by an error message or signal.
 
 Software faults may similarly cause errors that cause the service provided by
 the system to deviate from its specification. Well known software engineering
@@ -84,12 +81,6 @@ Software should not have the ability to induce hardware errors.
 
 A service failure occurs when the service deviates from its specification due
 to errors.
-
-Errors may propagate from component X to another component Y that consumes the
-results of the computation in component X and appears as an error that was
-detected by an external component. Eventually, if the error propagates to the
-external state of the service implemented by these components then a service
-failure occurs.
 
 A reliable system deals with errors through one or more of the following
 techniques:
