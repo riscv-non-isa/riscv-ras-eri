@@ -440,11 +440,6 @@ attempts to consume corrupted/poisoned data may contain the error to the program
 currently executing on the hart. Such errors may be reported with the `c` bit
 set to 1.
 
-For example, A RISC-V IOMMU by aborting the memory read transaction that caused
-the corrupted data from being consumed may contain the error to the device
-initiating the transaction, etc. Such errors may be reported with the `c` bit
-set to 1.
-
 While the `c` bit indicates that the error may be containable the RAS handler
 may or may not be able to recover the system from such errors. The RAS handler
 must make the recovery determination based on additional information provided in
@@ -554,7 +549,7 @@ description of the detected error. Standard `ec` encodings are defined in
 <<EC_ENCODINGS>>. If an error record detects an error that does not correspond
 to a standard `ec` encoding then such errors may be reported using a custom
 encoding. The custom encodings have the most significant bit set to 1 to
-differentiated them from the standard encodings.
+differentiate them from the standard encodings.
 
 An error record that supports the 1 setting of the `cece` field in `control_i`,
 implements a corrected-error-counter in the `cec` field. The `cec` is a WARL
@@ -573,14 +568,17 @@ CE.
 
 Some hardware units may implement low pass filters (e.g., leaky buckets) that
 throttle the rate which CE are reported and counted.
+====
 
+[NOTE]
+====
 It is recommended that if the `status_i` register discard explicit writes when
 `v=1`. Before performing an explicit write, for example to reset the `cec`,
 software should first clear the valid bit (if set) using `control_i.sinv` and
 then read the register to determine if the write was accepted.
 ====
 
-When a UE or DE error is logged in an error record the `cec` and `ceco` fields
+When an UE or DE error is logged in an error record, the `cec` and `ceco` fields
 of the error record are not modified and retain their values.
 
 ==== Address register (`addr_i`)
