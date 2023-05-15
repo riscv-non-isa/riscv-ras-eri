@@ -573,7 +573,7 @@ throttle the rate which CE are reported and counted.
 
 [NOTE]
 ====
-It is recommended that if the `status_i` register discard explicit writes when
+It is recommended that the `status_i` register discard explicit writes when
 `v=1`. Before performing an explicit write, for example to reset the `cec`,
 software should first clear the valid bit (if set) using `control_i.sinv`.
 ====
@@ -643,7 +643,14 @@ this register is `UNSPECIFIED`. An implementation that does not report a
 timestamp may hardwire this register to 0. Some fields of the register may be
 hardwired to zero if the field is unused to report the timestamp.
 
-The frequency and resolution of the timestamp are `UNSPECIFIED`.
+The nature, frequency, and resolution of the timestamp are `UNSPECIFIED`.
+
+[NOTE]
+====
+The timestamp may be constructed by a hardware unit using mechanism such as
+sampling a local cycles counter (e.g., the cycles counter of a RISC-V hart, a
+global counter (e.g, mtime, etc.), or other implementation specific means.
+====
 
 [[OVERWRITE_RULES]]
 === Error record overwrite rules
