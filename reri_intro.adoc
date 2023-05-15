@@ -138,36 +138,36 @@ corrected by the hardware are called *corrected errors (CE)*.
 Errors that could not be corrected are called uncorrected errors. A component
 that detects an uncorrected error may allow possibly corrupted data to
 propagate to the requester of the data but associate an indicator (e.g., poison)
-with the data. Such errors are said to be *deferred errors (DE)* as they allow
-the component to continue operation and defer dealing with the error to a later
-point in time if the data corrupted by the error is consumed. Defering errors
-allows deferring the error handling to an ultimate consumer of the corrupted
-data that may be able to provide more precise information to an error handler
-about the contexts affected by the corruption and thus enable more precise error
-recover actions by the error handler. The component that detected and deferred
-the error may signal an error recovery handler by logging the DE but such a DE
-does not need an immediate remedial action to be performed by the error handler.
-For example, a memory controller may detect an uncorrectable ECC error on
-data in memory but since there is no immediate consumer of the data the memory
-controller may just mark the data as poisoned and defer the error handling to a
-component that requests the data. If the poisoned data is never consumed then
-deferred errors are benign. If the poisoned data is completely overwritten with
-new data then the associated poison is cleared. If the poisoned data is only
-partially written then the data continues to be marked as poisoned. If the
-poisoned data is consumed by a component (e.g. a hart, an IOMMU, a device,
-etc.) then an *urgent error (UE)* occurs and a recovery handler is invoked as
-immediate remedial actions are required and further deferreral of the error is
-not possible.
+with the data. Such errors are said to be *uncorrected deferred errors (UDE)* as
+they allow the component to continue operation and defer dealing with the error
+to a later point in time if the data corrupted by the error is consumed. Defering
+errors allows deferring the error handling to an ultimate consumer of the
+corrupted data that may be able to provide more precise information to an error
+handler about the contexts affected by the corruption and thus enable more
+precise error recover actions by the error handler. The component that detected
+and deferred the error may signal an error recovery handler by logging the UDE
+but such a UDE does not need an immediate remedial action to be performed by the
+error handler.  For example, a memory controller may detect an uncorrectable ECC
+error on data in memory but since there is no immediate consumer of the data the
+memory controller may just mark the data as poisoned and defer the error
+handling to a component that requests the data. If the poisoned data is never
+consumed then deferred errors are benign. If the poisoned data is completely
+overwritten with new data then the associated poison is cleared. If the poisoned
+data is only partially written then the data continues to be marked as poisoned.
 
 A component that detects an uncorrected error may be unable to defer the
-handling of the error by techniques such as poisoning and may instead signal
-an error recovery handler by logging the UE. For example, a cache controller
+handling of the error by techniques such as poisoning. Such errors are said to
+be *uncorrected urgent errors (UUE)* and a recovery handler is invoked as
+immediate remedial actions are required. For example, a cache controller
 may detect an uncorrectable ECC error on the memory used to hold cache tags
 and since such errors cannot be attributed to any particular data element
-these errors may be classified as UE.
+these errors may be classified as UUE. If poisoned data is attempted to be
+consumed by a component (e.g. a hart, an IOMMU, a device, etc.) then an UUE
+occurs as immediate remedial actions are required and further deferreral of the
+error is not possible.
 
 A component that signals a request for execution of an error recovery handler
-for an UE may indicate that the error has not propagated beyond the boundaries
+for an UUE may indicate that the error has not propagated beyond the boundaries
 of the component that detected the error and thus may be *containable* through
 recovery actions (e.g., terminating the computation, etc.) carried out by the
 error recovery handler.
@@ -179,7 +179,7 @@ endpoint. In such cases the component may receive the data with a deferred
 error. Such a component may propagate the error and not log an error by itself.
 However, if the component to which the data is being propagated (e.g. a PCIe
 endpoint) is not capable of handling poison then the former component  must
-signal a UE instead of propagating the corrupted data, as the act of
+signal a UUE instead of propagating the corrupted data, as the act of
 propagation breaks containment of the error.
 
 An error detected by a component may lead to a failure mode where the component
@@ -225,7 +225,7 @@ components in the system.
                      fields when writing values to other fields in the same
                      register.
 | CXL              | Compute Express Link bus standard.
-| DE               | Deferred error.
+| UDE              | Uncorrected deferred error.
 | GPA              | Guest Physical Address. See Priv. specification.
 | ID               | Identifier.
 | OS               | Operating system.
@@ -263,7 +263,7 @@ components in the system.
                      system-on-chip.
 | SPA              | Supervisor Physical Address. See Priv. specification.
 | VA               | Virtual Address. See Priv. specification.
-| UE               | Urgent error.
+| UUE              | Uncorrected urgent error.
 | WARL             | Write Any values, Reads Legal values: Attribute of a
                      register field that is only defined for a subset of bit
                      encodings, but allow any value to be written while
