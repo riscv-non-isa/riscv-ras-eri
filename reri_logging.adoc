@@ -539,10 +539,11 @@ the error. When `tsv` field is 0, the value in `timestamp_i` register is
 The `scrub` bit is valid when a CE is logged and when set to 1 indicates that
 the storage location that held the data value has been updated with the
 corrected value (i.e., the data has been scrubbed). In an implementation that
-cannot make this distinction or where the error record is not associated with
-storage elements (e.g., correcting errors detected on bus transactions) this
-field may be hardwired to 0. If this property is unconditionally true for a
-hardware unit then this field may be hardwired to 1.
+cannot make this distinction then it may conservatively report this field as 0.
+When the error record is not associated with storage elements (e.g., correcting
+errors detected on bus transactions) this field may be hardwired to 0. If this
+property is unconditionally true for a hardware unit then this field may be
+hardwired to 1.
 
 The error-code (`ec`) is a WARL field holds an error code that provides a
 description of the detected error. Standard `ec` encodings are defined in
@@ -574,8 +575,7 @@ throttle the rate which CE are reported and counted.
 ====
 It is recommended that if the `status_i` register discard explicit writes when
 `v=1`. Before performing an explicit write, for example to reset the `cec`,
-software should first clear the valid bit (if set) using `control_i.sinv` and
-then read the register to determine if the write was accepted.
+software should first clear the valid bit (if set) using `control_i.sinv`.
 ====
 
 When an UUE or UDE error is logged in an error record, the `cec` and `ceco` fields
