@@ -573,9 +573,19 @@ throttle the rate which CE are reported and counted.
 
 [NOTE]
 ====
-It is recommended that the `status_i` register discard explicit writes when
-`v=1`. Before performing an explicit write, for example to reset the `cec`,
-software should first clear the valid bit (if set) using `control_i.sinv`.
+To invalidate a valid error record (presumably after having first read the error
+record), software should write 1 to the `control_i.sinv` control bit to clear
+the `v` bit in the `status_i` register of the error record. Using the `sinv`
+control to clear the `v` bit, as compared to an explicit write to the register,
+avoids overwriting the `cec` and `ceco` fields (which typically want to be
+maintained across logged errors).
+
+If software needs to initialize the `cec` and/or `ceco`, then a software write
+to the `status_i` register is appropriate. Before performing the write, software
+should first check for and read any valid error record and then write the register
+with the new `cec` and/or `ceco` value and with `v=0` (Or, if software for some
+reason wants to leave an existing valid error log in place, it should do a
+read-modify-write of the status register).
 ====
 
 When an UUE or UDE error is logged in an error record, the `cec` and `ceco` fields
