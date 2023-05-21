@@ -226,8 +226,8 @@ is as follows:
   {bits: 1,  name: 'sinv'},
   {bits: 1,  name: 'WPRI'},
   {bits: 2,  name: 'ces'},
-  {bits: 2,  name: 'des'},
-  {bits: 2,  name: 'ues'},
+  {bits: 2,  name: 'udes'},
+  {bits: 2,  name: 'uues'},
   {bits: 22, name: 'WPRI'},
   {bits: 16, name: 'eid'},
   {bits: 8,  name: 'WPRI'},
@@ -257,8 +257,8 @@ continue to use containment techniques like data poisoning even when logging and
 signaling is disabled.
 ====
 
-The `ces`, `des`, and `ues` are WARL fields used to enable signaling of CE, DE,
-and UE respectively when they are logged (i.e. when `else` is 1). Enables for
+The `ces`, `udes`, and `uues` are WARL fields used to enable signaling of CE, UDE,
+and UUE respectively when they are logged (i.e. when `else` is 1). Enables for
 unsupported classes of errors may be hardwired to 0. The encodings of these
 fields are specified in <<ERR_SIG_ENABLES>>.
 
@@ -332,7 +332,7 @@ of 0. Writing a value of 0 disables the counter. If error injection is not
 supported by the error record then the `eid` field may be hardwired to 0. When
 `eid` reaches a count of 0, the status register is made valid by setting the
 `status_i.v` bit to 1. The `status_i.v` transition from 0 to 1 generates a RAS
-signal corresponding to the class of error (CE, DE, or UE) setup in the
+signal corresponding to the class of error (CE, UDE, or UUE) setup in the
 `status_i` register. The counter continues to count even if the `status_i`
 register was overwritten by a hardware detected error before the `eid` counts
 down to 0.
@@ -392,7 +392,7 @@ If the detected error was corrected then `ce` is set to 1. If the detected error
 was deferred then `de` is set to 1. If the detected error could not be corrected
 or deferred and thus needs urgent handling by an error handler, then the `ue` bit
 is set to 1. If the error record does not log a class of errors (e.g., does not
-support DE), then the corresponding bit may be hardwired to 0. If the bits
+support UDE), then the corresponding bit may be hardwired to 0. If the bits
 corresponding to more than one error class are set to 1 then the error record
 holds information about the highest severity error class among the bits set.
 
@@ -401,7 +401,7 @@ the error record occur then the multiple-occurence (`mo`) bit is set to indicate
 the multiple occurrence of errors of the same severity. See <<OVERWRITE_RULES>>
 for rules on overwriting the error record in such cases.
 
-Each error of an error class (CE, DE, or UE) that may be logged in an error
+Each error of an error class (CE, UDE, or UUE) that may be logged in an error
 record may be associated with a priority which is a number between 0 and 3;
 priority value of 3 being the highest priority and priority value of 0 being the
 lowest priority. The priority values indicate relative priority among errors of
@@ -424,7 +424,7 @@ implementation may support only a subset of legal values for this field and
 an implementation that does not support reporting of a priority per error may
 hardwire this field to 0.
 
-The error record overwrite rules use the error class (CE, DE, or UE) and the
+The error record overwrite rules use the error class (CE, UDE, or UUE) and the
 error priority (`pri`) as specified in <<OVERWRITE_RULES>>.
 
 When an error occurs the containable (`c`) bit may be set to 1 to indicate
@@ -539,10 +539,11 @@ the error. When `tsv` field is 0, the value in `timestamp_i` register is
 The `scrub` bit is valid when a CE is logged and when set to 1 indicates that
 the storage location that held the data value has been updated with the
 corrected value (i.e., the data has been scrubbed). In an implementation that
-cannot make this distinction or where the error record is not associated with
-storage elements (e.g., correcting errors detected on bus transactions) this
-field may be hardwired to 0. If this property is unconditionally true for a
-hardware unit then this field may be hardwired to 1.
+cannot make this distinction then it may conservatively report this field as 0.
+When the error record is not associated with storage elements (e.g., correcting
+errors detected on bus transactions) this field may be hardwired to 0. If this
+property is unconditionally true for a hardware unit then this field may be
+hardwired to 1.
 
 The error-code (`ec`) is a WARL field holds an error code that provides a
 description of the detected error. Standard `ec` encodings are defined in
@@ -572,13 +573,22 @@ throttle the rate which CE are reported and counted.
 
 [NOTE]
 ====
-It is recommended that if the `status_i` register discard explicit writes when
-`v=1`. Before performing an explicit write, for example to reset the `cec`,
-software should first clear the valid bit (if set) using `control_i.sinv` and
-then read the register to determine if the write was accepted.
+To invalidate a valid error record (presumably after having first read the error
+record), software should write 1 to the `control_i.sinv` control bit to clear
+the `v` bit in the `status_i` register of the error record. Using the `sinv`
+control to clear the `v` bit, as compared to an explicit write to the register,
+avoids overwriting the `cec` and `ceco` fields (which typically want to be
+maintained across logged errors).
+
+If software needs to initialize the `cec` and/or `ceco`, then a software write
+to the `status_i` register is appropriate. Before performing the write, software
+should first check for and read any valid error record and then write the register
+with the new `cec` and/or `ceco` value and with `v=0` (Or, if software for some
+reason wants to leave an existing valid error log in place, it should do a
+read-modify-write of the status register).
 ====
 
-When an UE or DE error is logged in an error record, the `cec` and `ceco` fields
+When an UUE or UDE error is logged in an error record, the `cec` and `ceco` fields
 of the error record are not modified and retain their values.
 
 ==== Address register (`addr_i`)
@@ -643,7 +653,14 @@ this register is `UNSPECIFIED`. An implementation that does not report a
 timestamp may hardwire this register to 0. Some fields of the register may be
 hardwired to zero if the field is unused to report the timestamp.
 
-The frequency and resolution of the timestamp are `UNSPECIFIED`.
+The nature, frequency, and resolution of the timestamp are `UNSPECIFIED`.
+
+[NOTE]
+====
+The timestamp may be constructed by a hardware unit using mechanism such as
+sampling a local cycles counter (e.g., the cycles counter of a RISC-V hart, a
+global counter (e.g, mtime, etc.), or other implementation specific means.
+====
 
 [[OVERWRITE_RULES]]
 === Error record overwrite rules
@@ -652,11 +669,11 @@ When a hardware unit detects an error it may find its error record still valid
 due to an earlier detected error that has not been consumed yet by software.
 
 The overwrite rules allow a higher severity error to overwrite a lower severity
-error. UE has the highest severity, followed by DE, and then CE. When the two errors
+error. UUE has the highest severity, followed by UDE, and then CE. When the two errors
 have same severity the priority of the errors is used to determine if the error
 record is overwritten. Higher priority errors overwrite the lower priority
-errors. When a error record is overwritten by a higher severity error (DE/CE by
-UE, DE by UE, or CE by DE), the status bits indicating the severity of the older
+errors. When a error record is overwritten by a higher severity error (UDE/CE by
+UUE, UDE by UUE, or CE by UDE), the status bits indicating the severity of the older
 errors are retained (i.e., are sticky).
 
 The rules for writing the error record are as follows:
@@ -670,10 +687,10 @@ The rules for writing the error record are as follows:
         // There is a valid first error recorded
         if ( severity(new_error) > severity(status_i) )
             // Severity of second error is higher than first error
-            // The DE and CE bits are sticky and retained to provide the
+            // The UDE and CE bits are sticky and retained to provide the
             // overwrite history
-            status_i.UE |= new_status.UE
-            status_i.DE |= new_status.DE
+            status_i.UUE |= new_status.UUE
+            status_i.UDE |= new_status.UDE
             status_i.CE |= new_status.CE
             status_i.MO = 0
             overwrite = TRUE
@@ -690,9 +707,9 @@ The rules for writing the error record are as follows:
     else
         // There is a no error valid recorded
         // Note the severity of the new error
-        status_i.UE = new_status.UE
-        status_i.DE = new_status.DE & ~new_status.UE
-        sttaus_i.CE = new_status.CE & ~new_status.UE & ~new_status.DE
+        status_i.UUE = new_status.UUE
+        status_i.UDE = new_status.UDE & ~new_status.UUE
+        sttaus_i.CE = new_status.CE & ~new_status.UUE & ~new_status.UDE
         overwrite = TRUE;
     endif
 
@@ -712,9 +729,9 @@ The rules for writing the error record are as follows:
     status_i.v = 1
 ----
     
-If the `status_i.mo` is 1 and the logged error is a UE then the RAS handler
-should preferably restart the system to bring it to a correct state as an UE
-record has been lost. If the `status_i.mo` is 1 and the logged error is a DE
+If the `status_i.mo` is 1 and the logged error is a UUE then the RAS handler
+should preferably restart the system to bring it to a correct state as an UUE
+record has been lost. If the `status_i.mo` is 1 and the logged error is a UDE
 or a CE then the recovery handler may keep the system operational.
 
 A 0 to 1 transition of the `status_i.v` causes the signal configured in the
