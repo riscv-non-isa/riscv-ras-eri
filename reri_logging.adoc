@@ -800,11 +800,12 @@ The rules for writing the error record are as follows:
     endif
 
 ----
-    
-If the `status_i.mo` is 1 and the logged error is a UUE then the RAS handler
-should preferably restart the system to bring it to a correct state as an UUE
-record has been lost. If the `status_i.mo` is 1 and the logged error is a UDE
-or a CE then the RAS handler may keep the system operational.
+
+If the `status_i.v`, `status_i.mo`, and `status_i.uue` are all 1 then the RAS
+handler should preferably restart the system to bring it to a correct state as
+an UUE record has been lost. If the `status_i.v` and `status_i.mo` are 1 but
+`status_i.uue` is 0 (i.e., the logged error is a UDE or a CE) then the RAS
+handler may keep the system operational.
 
 If multiple errors occur simultaneously then they may be recorded in any order
 and the rules outlined in <<REC_WRITE_RULE>> lead to an identical end-state of
@@ -822,9 +823,8 @@ error. Other implementations may choose to record one of the errors as
 determined by implementation specific rules.
 ====
 
-A 0 to 1 transition of the `status_i.v` causes the signal configured in the
-`control_i` register for the highest severity error recorded in the error record
-to be generated.
+When a new error is recorded by the hardware unit in `status_i` register of its
+error record then the signal configured in the `control_i` register for the
 
 === Error logging defined by other standards
 
