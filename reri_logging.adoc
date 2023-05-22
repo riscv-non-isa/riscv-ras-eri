@@ -77,6 +77,50 @@ range from 0 to 62.
 |120 + 64 * i | Custom            |8   |Designated for custom use.
 |===
 
+All registers and register fields defined by this specification are WARL unless
+noted otherwise. While all registers and register fields of an error bank and
+the error records in an error bank must exist, is legal to implemnt a register
+and/or register field of as read-only zero or a read-only legal value if they
+are not required to report errors information in an implementation.
+
+[NOTE]
+====
+The number of error banks, the number of error records in an error bank and the
+amount of information reported in an error record may be implemented to meet the
+needs of the implementation. The error records are only required to implement the
+registers and register fields needed to report error information that is legally
+produceed by the implementation. 
+
+For example:
+
+* If an error record does not support reporting a timestamp with the error then
+  the `timestamp_i` register may be implemented as read-only zero. When
+  reporting a timestamp is supported, the width of the timestamp is
+  implementation defined and only bits needed to hold a legal timestamp value
+  need be implemented.
+
+* If an implementation does not report additional information or additional
+  supplemental information in the error record then the `info_i` and/or
+  `suppl_info_i` registers and their validity indicators in `status_i` may be
+  read-only zero. Where information is reported in these registers, the error
+  record only needs to implement the bits needed to report the information.
+
+* The `addr_i` register and the address type field in `status_i` register
+  only needs to implement bits and encodings needed to report the legal
+  addresses supported by the implementation. If an error record does
+  not report of addresses then the entire register may be read-only zero.
+
+* The `valid_summary` register may be read-only zero if the implementation does
+  not support reporting a summary of valid error records in an error bank.
+
+* If corrected error counting is not supported by an implementation then the
+  `cec` and `ceco` fields of the `status_i` register may be read-only zero.
+
+* If error record injection capability is not supported then the `eid` field
+  of the `control_i` register may be read-only zero.
+
+====
+
 === Reset behavior
 
 The reset value is `UNSPECIFIED` for RERI registers.
