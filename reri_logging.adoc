@@ -735,6 +735,7 @@ unsigned integer overflow detected on increment of `cec` sets `ceco` to 1.
 
 The rules for writing the error record are as follows:
 
+[[REC_WRITE_RULE]]
 .Error record writing rules
 [source, ruby]
 ----
@@ -804,6 +805,22 @@ If the `status_i.mo` is 1 and the logged error is a UUE then the RAS handler
 should preferably restart the system to bring it to a correct state as an UUE
 record has been lost. If the `status_i.mo` is 1 and the logged error is a UDE
 or a CE then the RAS handler may keep the system operational.
+
+If multiple errors occur simultaneously then they may be recorded in any order
+and the rules outlined in <<REC_WRITE_RULE>> lead to an identical end-state of
+the error record. When the error record registers are written by an error, all
+registers that are written must be written with information related to that
+error.
+
+[NOTE]
+====
+When multiple errors occur simultaneously, some implementations may choose to
+record each error individually following the rules outlined in
+<<REC_WRITE_RULE>>. Some implementations may however choose to only record the
+highest severity error or when they have the same severity the highest priority
+error. Other implementations may choose to record one of the errors as
+determined by implementation specific rules.
+====
 
 A 0 to 1 transition of the `status_i.v` causes the signal configured in the
 `control_i` register for the highest severity error recorded in the error record
