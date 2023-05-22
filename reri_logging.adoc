@@ -8,12 +8,19 @@ records. One or more error records may be valid at any instance of time due to
 one or more hardware units in the component detecting an error or due to a
 hardware unit having detected one or more errors.
 
-Each error bank is memory-mapped and is located within a naturally aligned
-4-KiB region (a page) of physical address space that exists for each error bank,
-i.e., one page per bank. Each error bank may include up to 63 error records.
-Each error record is a set of registers used to control that error record and to
-report status, address, and other information relevant to the error recorded in
-that error record.
+Each error bank is memory-mapped starting at an 8-byte aligned physical address
+and may include up to 63 error records. Each error record is a set of registers
+used to control that error record and to report status, address, and other
+information relevant to the error recorded in that error record.
+
+[NOTE]
+====
+Implementations may implementing a coarser alignment for the start address of
+an error bank. For example, some implementations may locate the error bank
+within a naturally aligned 4-KiB region (a page) of physical address space for
+each error bank, i.e., one page per bank. Coarser alignments may enable register
+decoding to be implemented without a hardware adder circuit.
+====
 
 The behavior for register accesses where the address is not aligned to
 the size of the access, or if the access spans multiple registers, or if the
