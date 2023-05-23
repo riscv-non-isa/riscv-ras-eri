@@ -15,6 +15,7 @@ handlers. Lastly, this specification shall provide maximal flexibility to
 implement error handling and shall co-exist with RAS frameworks defined by other
 standards such as PCIe, CXL, etc.
 
+
 A system is an entity that interacts with other entities such as other systems,
 software, operators, etc. to deliver one or more services in its role as a
 service provider. A system may itself be a consumer of one or more services
@@ -211,6 +212,25 @@ causing errors, etc. In such cases the system may be able to continue operation
 due to error correction ability but may still raise a notification to a RAS
 handler such that maintenance can be scheduled to replace the failing
 components in the system.
+
+=== RERI features
+
+Version 1.0 of the RISC-V RERI specification supports the following features:
+
+* Error severity classes and standard error codes.
+* Standard register format and addressing for memory-mapped error-record
+  registers and error-record banks.
+* Rules for prioritized overwriting of valid error records with new error
+  records.
+* Corrected error counting.
+* Error record injection for RAS handler testing.
+
+This specification is intended to accommodate a wide variety of systems
+designs and needs - from high-end server-class systems to low-end embedded
+systems. This is accomplished through providing implementation flexibility
+and options - both within the registers of an error record and the number
+of error records in an error bank, and with respect to the association
+between hardware components and error errors/banks.
 
 === Glossary
 .Terms and definitions
