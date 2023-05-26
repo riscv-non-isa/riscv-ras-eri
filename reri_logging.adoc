@@ -556,9 +556,9 @@ Implementations may report additional information about the transaction (e.g.,
 whether speculative, on-demand vs. prefetch, etc.) in the `info_i` and/or
 `suppl_info_i` registers.
 
-For a RISC-V hart, the Privileged specification defines memory accesses by
-instructions as either explicit or implicit. Implicit read and write are
-accesses that may be implicitly performed by hardware to perform an explicit
+For a RISC-V hart, the Privileged specification cite:[PRIV] defines memory
+accesses by instructions as either explicit or implicit. Implicit read and write
+are accesses that may be implicitly performed by hardware to perform an explicit
 operation. For example, a load or store instruction executed by the hart may
 perform implicit memory accesses to page table data structures. Instruction
 memory accesses by a hart are termed as implicit accesses by the Privileged
@@ -823,9 +823,10 @@ asserted.
 
 === Error logging defined by other standards
 
-Standards such as PCIe and CXL define standardized error logging architectures
-such as the PCIe Advanced Error Reporting (AER). Specifications such as CXL
-define a standardized set of RAS requirements for hosts and devices.
+Standards such as PCIe cite:[PCI] and CXL cite:[CXL] define standardized error
+logging architectures such as the PCIe Advanced Error Reporting (AER).
+Specifications such as CXL define a standardized set of RAS requirements for
+hosts and devices.
 
 The RISC-V RERI extension complements the error reporting architecture
 defined by these standards with a RISC-V standard for reporting errors for
