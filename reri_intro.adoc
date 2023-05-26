@@ -10,10 +10,11 @@ to report the error to a RAS handler component. The RAS handler may use this
 information to determine suitable recovery actions that may include terminating
 the computation (e.g., terminating a process, etc.), restarting parts or all of
 the system, etc. to recover from the errors. Additionally, this specification
-shall support software-initiated error logging, reporting, and testing of error
+shall support software-initiated error logging, reporting, and testing of RAS
 handlers. Lastly, this specification shall provide maximal flexibility to
 implement error handling and shall co-exist with RAS frameworks defined by other
 standards such as PCIe, CXL, etc.
+
 
 A system is an entity that interacts with other entities such as other systems,
 software, operators, etc. to deliver one or more services in its role as a
@@ -142,12 +143,12 @@ with the data. Such errors are said to be *uncorrected deferred errors (UDE)* as
 they allow the component to continue operation and defer dealing with the error
 to a later point in time if the data corrupted by the error is consumed. Defering
 errors allows deferring the error handling to an ultimate consumer of the
-corrupted data that may be able to provide more precise information to an error
+corrupted data that may be able to provide more precise information to a RAS
 handler about the contexts affected by the corruption and thus enable more
-precise error recover actions by the error handler. The component that detected
-and deferred the error may signal an error recovery handler by logging the UDE
+precise error recover actions by the RAS handler. The component that detected
+and deferred the error may signal a RAS handler by logging the UDE
 but such a UDE does not need an immediate remedial action to be performed by the
-error handler.  For example, a memory controller may detect an uncorrectable ECC
+RAS handler.  For example, a memory controller may detect an uncorrectable ECC
 error on data in memory but since there is no immediate consumer of the data the
 memory controller may just mark the data as poisoned and defer the error
 handling to a component that requests the data. If the poisoned data is never
@@ -157,7 +158,7 @@ data is only partially written then the data continues to be marked as poisoned.
 
 A component that detects an uncorrected error may be unable to defer the
 handling of the error by techniques such as poisoning. Such errors are said to
-be *uncorrected urgent errors (UUE)* and a recovery handler is invoked as
+be *uncorrected urgent errors (UUE)* and a RAS handler is invoked as
 immediate remedial actions are required. For example, a cache controller
 may detect an uncorrectable ECC error on the memory used to hold cache tags
 and since such errors cannot be attributed to any particular data element
@@ -166,11 +167,11 @@ consumed by a component (e.g. a hart, an IOMMU, a device, etc.) then an UUE
 occurs as immediate remedial actions are required and further deferreral of the
 error is not possible.
 
-A component that signals a request for execution of an error recovery handler
+A component that signals a request for execution of an RAS handler
 for an UUE may indicate that the error has not propagated beyond the boundaries
 of the component that detected the error and thus may be *containable* through
 recovery actions (e.g., terminating the computation, etc.) carried out by the
-error recovery handler.
+RAS handler.
 
 Some components act as an intermediary through which the data passes through.
 For example, a PCIe/CXL port is an intermediary component that by itself does
@@ -187,8 +188,8 @@ may not be able to service requests anymore (e.g. colloquially called jammed,
 wedged, etc.). For example, an error in the hart pipeline may cause the hart to
 stop committing instructions, a fabric may be in a state where it cannot process
 any further requests, the link connecting the memory module to the host may have
-failed, etc. In such cases invoking a software recovery handler may not be useful
-as the recovery handler itself needs to generate requests to the failed component
+failed, etc. In such cases invoking a RAS handler may not be useful
+as the RAS handler itself may need to generate requests to the failed component
 to perform the recovery actions. Components in such failed states may use an
 implementation-defined signal to a system recovery controller (e.g., a board
 management controller (BMC), an on-chip service controller, etc.) to initiate a
@@ -202,15 +203,34 @@ due to aging, etc. A future service failure could be avoided if the corrected
 errors can be monitored. To support such monitoring components in a resilient
 system may include counters to count the corrections performed. Such components
 may further include a threshold or support a programmable threshold to notify
-error handlers when the number of corrected errors exceeds the threshold. A
+a RAS handler when the number of corrected errors exceeds the threshold. A
 component may also track history of corrected errors and determine if the
 corrected errors are being triggered by transient faults or permanent faults.
 For example, a cache may detect that certain cells are repeatedly causing
 errors, a bus may detect that a certain lane is stuck at a logic level and
 causing errors, etc. In such cases the system may be able to continue operation
-due to error correction ability but may still raise a notification to error
-handlers such that maintenance can be scheduled to replace the failing
+due to error correction ability but may still raise a notification to a RAS
+handler such that maintenance can be scheduled to replace the failing
 components in the system.
+
+=== RERI features
+
+Version 1.0 of the RISC-V RERI specification supports the following features:
+
+* Error severity classes and standard error codes.
+* Standard register format and addressing for memory-mapped error-record
+  registers and error-record banks.
+* Rules for prioritized overwriting of valid error records with new error
+  records.
+* Corrected error counting.
+* Error record injection for RAS handler testing.
+
+This specification is intended to accommodate a wide variety of systems
+designs and needs - from high-end server-class systems to low-end embedded
+systems. This is accomplished through providing implementation flexibility
+and options - both within the registers of an error record and the number
+of error records in an error bank, and with respect to the association
+between hardware components and error errors/banks.
 
 === Glossary
 .Terms and definitions
