@@ -614,7 +614,7 @@ data and continue to count even when the `v` field is 0.
 
 [NOTE]
 ====
-Some hardware units may maintain a history of CE and may report a CE and
+Some hardware units may maintain a history of CE and may report a CE and may
 increment the `cec` only if the error is not identical to a previously reported
 CE.
 
