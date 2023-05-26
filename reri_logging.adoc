@@ -763,7 +763,7 @@ The rules for writing the error record are as follows:
             status_i.MO = 1
 
             // When the two errors have same severity the priority of
-            // the errors (as determined by `status_i.pri`) is used to
+            // the errors (as determined by status_i.pri) is used to
             // determine if the error record is overwritten. Higher
             // priority errors overwrite the lower priority errors.
             // If priority of second error is higher than that of the
@@ -824,13 +824,15 @@ determined by implementation specific rules.
 ====
 
 When a new error is recorded by the hardware unit in `status_i` register of its
-error record then the signal configured in the `control_i` register for the
+error record then the signal configured in the `control_i` register for error is
+asserted.
 
 === Error logging defined by other standards
 
 Standards such as PCIe and CXL define standardized error logging architectures
 such as the PCIe Advanced Error Reporting (AER). Specifications such as CXL
-define a standardized set of RAS requirements for hosts and devices to comply to.
+define a standardized set of RAS requirements for hosts and devices.
+
 The RISC-V RERI extension complements the error reporting architecture
 defined by these standards with a RISC-V standard for reporting errors for
 components that are not PCIe/CXL components. There may also be other error
@@ -840,8 +842,8 @@ specification.
 The RISC-V system components such as PCIe root ports or PCIe Root Complex Event
 Collectors may themselves implement error logging compliant with the RISC-V
 RERI extensions and thus provide a unified error reporting mechanism in such
-systems. For example, a root complex event collector may support an error log
-to report errors logged in the AER logs. 
+systems. For example, a root complex event collector may support an error record
+to report errors logged in the AER log registers. 
 
 === Error code encodings
 
