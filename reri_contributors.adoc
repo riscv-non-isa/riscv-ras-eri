@@ -3,4 +3,4 @@
 This RISC-V specification has been contributed to directly or indirectly by (in alphabetical order):
 
 [%hardbreaks]
-Aaron Durbin, Allen Baum, Andrew Walter, Anup Patel, Cameron McNairy, Dimitris Gizopoulos, David Kruckemeyer, Dhaval Sharma, Greg Favor, Himanshu Chauhan, Mostafa Hadizadeh, Vedvyas Shanbhogue, Xiaohan Ma
+Aaron Durbin, Allen Baum, Andrew Walter, Anup Patel, Cameron McNairy, Dimitris Gizopoulos, David Kruckemeyer, Dhaval Sharma, Drew Walter, Greg Favor, Himanshu Chauhan, Holger Blasum, Mostafa Hadizadeh, Vedvyas Shanbhogue, Xiaohan Ma
