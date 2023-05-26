@@ -737,65 +737,59 @@ The rules for writing the error record are as follows:
 
 [[REC_WRITE_RULE]]
 .Error record writing rules
-[source, ruby]
+[listing]
 ----
     Let new_status be the value to be recorded in status_i register for the new error
     overwrite = FALSE
     if status_i.v == 1
         // There is a valid first error recorded
         if ( severity(new_error) > severity(status_i) )
-            // The overwrite rules allow a higher severity error to
-            // overwrite a lower severity error. UUE has the highest
-            // severity, followed by UDE, and then CE. When a error
-            // record is overwritten by a higher severity error, the
-            // status bits indicating the severity of the older errors
-            // are retained (i.e., are sticky).
-
-            status_i.UUE |= new_status.UUE
-            status_i.UDE |= new_status.UDE
-            status_i.CE |= new_status.CE
-            status_i.MO = 0
+            // A higher severity error may overwrite a lower severity error. UUE has
+            // the highest severity, followed by UDE, and then CE. When a error
+            // record is overwritten by a higher severity error, the status bits
+            // indicating the severity of the older errors are retained
+            // (i.e., are sticky).
+            status_i.uue |= new_status.uue
+            status_i.ude |= new_status.ude
+            status_i.ce |= new_status.ce
+            status_i.mo = 0
             overwrite = TRUE
         endif
         if ( severity(new_status) == severity(status_i) )
-            // The occurrence of a second error of the same severity is
-            // indicated by setting the multiple-occurrence (MO) field to 1
-            status_i.MO = 1
-
+            // Indicate occurrence of second error of same severity by setting
+            // the multiple-occurrence (MO) field to 1
+            status_i.mo = 1
             // When the two errors have same severity the priority of
             // the errors (as determined by status_i.pri) is used to
             // determine if the error record is overwritten. Higher
             // priority errors overwrite the lower priority errors.
-            // If priority of second error is higher than that of the
-            // first error then overwrite to record the second error
             if ( new_status.pri > status_i.pri )
                 overwrite = TRUE;
             endif
         endif
     else
         // There is a no valid error recorded. The new error is recorded.
-        // The severity of the new error may be one UUE, UDE, or CE.
-        // The sticky error history is cleared and the multiple occurrence
+        // The severity of the new error may be one of UUE, UDE, or CE.
+        // The sticky error history is cleard and the multiple occurrence
         // flag is set to 0.
-        status_i.UUE = new_status.UUE
-        status_i.UDE = new_status.UDE & ~new_status.UUE
-        status_i.CE = new_status.CE & ~new_status.UUE & ~new_status.UDE
-        status_i.MO = 0
+        status_i.uue = new_status.uue
+        status_i.ude = new_status.ude & ~new_status.uue
+        status_i.ce = new_status.ce & ~new_status.uue & ~new_status.ude
+        status_i.mo = 0
         overwrite = TRUE;
     endif
-
     if ( overwrite = TRUE )
-        status_i.pri = new_status.pri
-        status_i.c = new_status.c
-        status_i.tt = new_status.tt
-        status_i.at = new_status.at
-        status_i.iv = new_status.iv
-        status_i.siv = new_status.siv
-        status_i.tsv = new_status.tsv
+        status_i.pri   = new_status.pri
+        status_i.c     = new_status.c
+        status_i.tt    = new_status.tt
+        status_i.at    = new_status.at
+        status_i.iv    = new_status.iv
+        status_i.siv   = new_status.siv
+        status_i.tsv   = new_status.tsv
         status_i.scrub = new_status.scrub
-        status_i.ec = new_status.ec
-        // Update addr_i, info_i, suppl_info_i, timestamp_i with information
-        // about the new error if the information is valid.
+        status_i.ec    = new_status.ec
+        // Update addr_i, info_i, suppl_info_i, timestamp_i with information, if
+        // valid, about the new error
         status_i.v = 1
     endif
 
