@@ -849,9 +849,9 @@ to report errors logged in the AER log registers.
 .Error code encodings
 [cols="^1,3", options="header"]
 |===
-| *Encoding* | *Error signal*
+| *Encoding* | *Description*
 |   0        | None
-|   1        | Other
+|   1        | Other/Unspecified error
 |   2        | Corrupted data access (e.g. consumption of poison)
 |   3        | Cache data error
 |   4        | Cache scrubbing detected data error
@@ -862,7 +862,7 @@ to report errors logged in the AER log registers.
 |   9        | TLB/Page-walk cache data error
 |  10        | TLB/Page-walk cache tag error
 |  11        | TLB/Page-walk cache unspecified error
-|  12        | Hart architectural state error
+|  12        | Hart state error
 |  13        | Interrupt controller/register file error
 |  14        | Interconnect data error
 |  15        | Interconnect other error
@@ -878,6 +878,6 @@ to report errors logged in the AER log registers.
 |  25        | System internal controller (power management, security, etc.) error
 |  26        | Deferred error passthrough not supported
 |  27        | PCIe/CXL component detected errors.
-|  28 - 127  | Reserved for future standard use.
-| 128 - 255  | Designated for custom use.
+|  28 - 63   | Reserved for future standard use.
+|  64 - 255  | Designated for custom use.
 |===
