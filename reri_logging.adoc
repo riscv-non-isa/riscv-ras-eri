@@ -875,6 +875,6 @@ to report errors logged in the AER log registers.
 |  25        | System internal controller (power management, security, etc.) error
 |  26        | Deferred error passthrough not supported
 |  27        | PCIe/CXL component detected errors.
-|  28 - 127  | Reserved for future standard extensions.
+|  28 - 127  | Reserved for future standard use.
 | 128 - 255  | Designated for custom use.
 |===
