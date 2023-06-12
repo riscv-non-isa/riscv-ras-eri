@@ -3,10 +3,10 @@
 == Introduction
 
 The RERI specification augments RAS features in the SoC with a standard
-mechanism for reporting and logging errors by means of a memory-mapped register
-interface to enable error logging, provide the facility to log the detected
+mechanism for reporting errors by means of a memory-mapped register
+interface to enable error reporting, provide the facility to log the detected
 errors (including their severity, nature, and location), and configuring means
-to report the error to a RAS handler component. The RAS handler may use this
+to signal the error to a RAS handler component. The RAS handler may use this
 information to determine suitable recovery actions that may include terminating
 the computation (e.g., terminating a process, etc.), restarting parts or all of
 the system, etc. to recover from the errors. Additionally, this specification
@@ -146,7 +146,7 @@ errors allows deferring the error handling to an ultimate consumer of the
 corrupted data that may be able to provide more precise information to a RAS
 handler about the contexts affected by the corruption and thus enable more
 precise error recover actions by the RAS handler. The component that detected
-and deferred the error may signal a RAS handler by logging the UDE
+and deferred the error may notify a RAS handler by reporting the UDE
 but such a UDE does not need an immediate remedial action to be performed by the
 RAS handler.  For example, a memory controller may detect an uncorrectable ECC
 error on data in memory but since there is no immediate consumer of the data the
@@ -246,6 +246,10 @@ between hardware components and error errors/banks.
                      register.
 | CXL              | Compute Express Link bus standard.
 | UDE              | Uncorrected deferred error.
+| Error Reporting  | Error reporting is the process of logging information
+                     (including their severity, nature, and location) about
+                     a detected error in an error record and signaling the
+                     occurrence of the error to an appropriate RAS handler.
 | GPA              | Guest Physical Address. See Priv. specification.
 | ID               | Identifier.
 | OS               | Operating system.
