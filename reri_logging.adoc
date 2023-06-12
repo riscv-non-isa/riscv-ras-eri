@@ -828,7 +828,7 @@ reporting architectures such as the PCIe Advanced Error Reporting (AER).
 Specifications such as CXL define a standardized set of RAS requirements for
 hosts and devices.
 
-The RISC-V RERI extension complements the error reporting architecture
+The RISC-V RERI specification complements the error reporting architecture
 defined by these standards with a RISC-V standard for reporting errors for
 components that are not PCIe/CXL components. There may also be other error
 reporting mechanisms, possibly custom, that are employed alongside the RERI
@@ -836,7 +836,7 @@ specification.
 
 The RISC-V system components such as PCIe root ports or PCIe Root Complex Event
 Collectors may themselves implement error reporting compliant with the RISC-V
-RERI extensions and thus provide a unified error reporting mechanism in such
+RERI specification and thus provide a unified error reporting mechanism in such
 systems. For example, a root complex event collector may support an error record
 to report errors logged in the AER log registers. 
 
