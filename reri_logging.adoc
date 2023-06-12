@@ -834,11 +834,14 @@ components that are not PCIe/CXL components. There may also be other error
 reporting mechanisms, possibly custom, that are employed alongside the RERI
 specification.
 
+[NOTE]
+====
 The RISC-V system components such as PCIe root ports or PCIe Root Complex Event
 Collectors may themselves implement error reporting compliant with the RISC-V
 RERI specification and thus provide a unified error reporting mechanism in such
 systems. For example, a root complex event collector may support an error record
 to report errors logged in the AER log registers. 
+====
 
 === Error code encodings
 
