@@ -245,7 +245,6 @@ between hardware components and error errors/banks.
                      fields when writing values to other fields in the same
                      register.
 | CXL              | Compute Express Link bus standard.
-| UDE              | Uncorrected deferred error.
 | Error Reporting  | Error reporting is the process of logging information
                      (including their severity, nature, and location) about
                      a detected error in an error record and signaling the
@@ -287,6 +286,7 @@ between hardware components and error errors/banks.
                      system-on-chip.
 | SPA              | Supervisor Physical Address. See Priv. specification.
 | VA               | Virtual Address. See Priv. specification.
+| UDE              | Uncorrected deferred error.
 | UUE              | Uncorrected urgent error.
 | WARL             | Write Any values, Reads Legal values: Attribute of a
                      register field that is only defined for a subset of bit
