@@ -245,10 +245,12 @@ between hardware components and error errors/banks.
                      fields when writing values to other fields in the same
                      register.
 | CXL              | Compute Express Link bus standard.
-| Data             | A collection of symbols coded in a format that can be input
-                     to and processed by a computing system. This includes data
-                     in the form of coded instructions to control the operations
-                     of the computing system.
+| Data             | In this specification data refers broadly to all forms of
+                     information being stored or transferred in a computing
+                     system. In the case of a CPU, for example, this encompasses
+                     information that may be treated as instructions that are
+                     fetched and executed, as well as data that is loaded and
+                     stored.
 | Error Reporting  | Error reporting is the process of logging information
                      (including their severity, nature, and location) about
                      a detected error in an error record and signaling the
