@@ -854,7 +854,7 @@ to report errors logged in the AER log registers.
 |   1        | Other unspecified error occurred
 |   2        | Corrupted data access (e.g. attempted consumption of poisoned
                data by a load or an instruction fetch) error.
-|   3        | Cache block data memory (e.g., ECC error on cache data) error
+|   3        | Cache block data (e.g., ECC error on cache data) error
 |   4        | Cache scrubbing detected (e.g., ECC error on cache data) error
 |   5        | Cache address/control state (e.g., parity error tag or state) error
 |   6        | Cache unspecified error
