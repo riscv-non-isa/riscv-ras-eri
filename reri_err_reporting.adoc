@@ -243,12 +243,12 @@ The `valid_summary` is a read-only register and its layout is as follows:
 [wavedrom, , ]
 ....
 {reg: [
-  {bits: 1,  name: 'SV'},
+  {bits: 1,  name: 'sv'},
   {bits: 63, name: 'valid_bitmap'},
 ], config:{lanes: 4, hspace:1024}}
 ....
 
-The `SV` bit when 1 indicates that the `valid_bitmap` provides a summary of the
+The `sv` bit when 1 indicates that the `valid_bitmap` provides a summary of the
 `valid` bits from the status registers of this error bank. If this bit is 0
 then the error bank does not provide a summary of valid bits and the
 `valid_bitmap` is 0.
@@ -258,15 +258,7 @@ then the error bank does not provide a summary of valid bits and the
 If `SV` is 1, then software may use the `valid_bitmap` to determine which error
 records in the bank are valid. If this bit is 0 then software must read the
 `status_register_i` of each implemented error record in this bank to determine
-if there is a valid error logged in that error record. The algorithm to
-determine the records to scan is summarized as follows:
-  
-[listing]
-----
- records_to_scan = (valid_summary.SV == 1) ? valid_summary.valid_bitmap :
-                                             (1 << bank_info.n_err_recs) - 1;
-----
-
+if there is a valid error logged in that error record.
 ====
 
 === Error record registers
