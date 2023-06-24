@@ -861,8 +861,7 @@ to report errors logged in the AER log registers.
 | *Encoding* | *Description*
 |   0        | None
 |   1        | Other unspecified error occurred
-|   2        | Corrupted data access (e.g. attempted consumption of poisoned
-               data by a load or an instruction fetch) error.
+|   2        | Corrupted data access (e.g., attempt to consume poisoned data) error
 |   3        | Cache block data (e.g., ECC error on cache data) error
 |   4        | Cache scrubbing detected (e.g., ECC error on cache data) error
 |   5        | Cache address/control state (e.g., parity error tag or state) error
@@ -874,9 +873,9 @@ to report errors logged in the AER log registers.
 |  10        | TLB/Page-walk cache address/control state (e.g., ECC error on TLB
                tag) error
 |  11        | TLB/Page-walk cache unspecified error
-|  12        | Hart state error (e.g, ECC error on CSRs or x/f/v registers)
-|  13        | Interrupt controller register file (e.g., ECC error on interrupt
-               pending or interrupt enable state) error
+|  12        | Hart state error (e.g., ECC error on CSRs or x/f/v registers)
+|  13        | Interrupt controller state (e.g., ECC error on interrupt
+               pending/enable state) error
 |  14        | Interconnect data (e.g., ECC error on data bus) error
 |  15        | Interconnect other (e.g., parity error on address bus) error
 |  16        | Internal watchdog error
@@ -892,7 +891,7 @@ to report errors logged in the AER log registers.
 |  24        | Protocol Error - timeout error
 |  25        | System internal controller (power management, security, etc.) error
 |  26        | Deferred error passthrough (e.g., forwarding poisoned data to a
-               bus that cannot carry data-poison indicator) not supported
+               bus that cannot carry poison indicator) not supported
 |  27        | PCIe/CXL component detected (e.g., errors were logged into PCIe AER,
                CXL.mem error log, etc.) errors
 |  28 - 63   | Reserved for future standard use
