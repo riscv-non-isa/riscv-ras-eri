@@ -2,11 +2,12 @@
 
 Components (e.g., a RISC-V hart, a memory controller, etc.) in a system that
 support error detection may implement one or more banks of error records. Each
-error record corresponds to a hardware unit of the component and reports errors
-detected by that hardware unit. A hardware unit may implement multiple error
-records. One or more error records may be valid at any instance of time due to
-one or more hardware units in the component detecting an error or due to a
-hardware unit having detected one or more errors.
+error bank may implement one or more error records. Each error record
+corresponds to a hardware unit of the component and reports errors detected by
+that hardware unit. A hardware unit may implement multiple error records. One or
+more error records may be valid at any instance of time due to one or more
+hardware units in the component detecting an error or due to a hardware unit
+having detected one or more errors.
 
 Each error bank is memory-mapped starting at an 8-byte aligned physical address
 and may include up to 63 error records. Each error record is a set of registers
@@ -106,10 +107,10 @@ produceed by the implementation.
 For example:
 
 * If an error record does not support reporting a timestamp with the error then
-  the `timestamp_i` register may be implemented as read-only zero. When
-  reporting a timestamp is supported, the width of the timestamp is
-  implementation defined and only bits needed to hold a legal timestamp value
-  need be implemented.
+  the `timestamp_i` register and the `tsv` field of the `status_i` register may
+  be implemented as read-only zero. When reporting a timestamp is supported, the
+  width of the timestamp is implementation defined and only bits needed to hold
+  a legal timestamp value need be implemented.
 
 * If an implementation does not report additional information or additional
   supplemental information in the error record then the `info_i` and/or
@@ -120,13 +121,15 @@ For example:
 * The `addr_i` register and the address type field in `status_i` register
   only needs to implement bits and encodings needed to report the legal
   addresses supported by the implementation. If an error record does
-  not report of addresses then the entire register may be read-only zero.
+  not report of addresses then the entire register may be read-only zero and the
+  the validty indicators in `status_i` may be be read-only zero.
 
 * The `valid_summary` register may be read-only zero if the implementation does
   not support reporting a summary of valid error records in an error bank.
 
 * If corrected error counting is not supported by an implementation then the
-  `cec` and `ceco` fields of the `status_i` register may be read-only zero.
+  `cec` and `ceco` fields of the `status_i` register and the `cece` field of the
+  `control_i` register may be read-only zero.
 
 * If error record injection capability is not supported then the `eid` field
   of the `control_i` register may be read-only zero.
@@ -214,10 +217,11 @@ versions of the register layout. Software should first read the `version` field
 and use the value to determine the register layout.
 ====
 
-The `inst_id` field identifies a unique instance, within a package or at least a
-silicon die, of the component; ideally unique in the whole system. The `inst_id`
-are defined by the vendor of the system as a unique identifier for the component.
-A value of 0 may be returned to indicate the field is not implemented.
+The `inst_id` field identifies a unique instance of an error bank, within a
+package or at least a silicon die, of the component; ideally unique in the whole
+system. The `inst_id` are defined by the vendor of the system as a unique
+identifier for the component. A value of 0 may be returned to indicate the field
+is not implemented.
 
 [NOTE]
 ====
