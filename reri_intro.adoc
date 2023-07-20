@@ -141,7 +141,7 @@ that detects an uncorrected error may allow possibly corrupted data to
 propagate to the requester of the data but associate an indicator (e.g., poison)
 with the data. Such errors are said to be *uncorrected deferred errors (UDE)* as
 they allow the component to continue operation and defer dealing with the error
-to a later point in time if the data corrupted by the error is consumed. Defering
+to a later point in time if the data corrupted by the error is consumed. Deferring
 errors allows deferring the error handling to an ultimate consumer of the
 corrupted data that may be able to provide more precise information to a RAS
 handler about the contexts affected by the corruption and thus enable more
@@ -164,7 +164,7 @@ may detect an uncorrectable ECC error on the memory used to hold cache tags
 and since such errors cannot be attributed to any particular data element
 these errors may be classified as UUE. If poisoned data is attempted to be
 consumed by a component (e.g. a hart, an IOMMU, a device, etc.) then an UUE
-occurs as immediate remedial actions are required and further deferreral of the
+occurs as immediate remedial actions are required and further deferral of the
 error is not possible.
 
 A component that signals a request for execution of an RAS handler
