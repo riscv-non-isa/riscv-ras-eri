@@ -134,6 +134,10 @@ For example:
 * If error record injection capability is not supported then the `eid` field
   of the `control_i` register may be read-only zero.
 
+A minimal system may have one error bank with one error record occupying 128
+bytes in the memory-map and all registers other than the `bank_info`, 
+`control_i` and the `status_i` registers may be read-only zero.
+
 ====
 
 === Reset behavior
