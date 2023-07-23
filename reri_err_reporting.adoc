@@ -3,11 +3,11 @@
 Components (e.g., a RISC-V hart, a memory controller, etc.) in a system that
 support error detection may implement one or more banks of error records. Each
 error bank may implement one or more error records. Each error record
-corresponds to a hardware unit of the component and reports errors detected by
-that hardware unit. A hardware unit may implement multiple error records. One or
-more error records may be valid at any instance of time due to one or more
-hardware units in the component detecting an error or due to a hardware unit
-having detected one or more errors.
+corresponds to one or more hardware units of the component and reports errors
+detected by those hardware units. A hardware unit may implement multiple error
+records. One or more error records may be valid at any instance of time due to
+one or more hardware units in the component detecting an error or due to a
+hardware unit having detected one or more errors.
 
 Each error bank is memory-mapped starting at an 8-byte aligned physical address
 and may include up to 63 error records. Each error record is a set of registers
@@ -426,8 +426,8 @@ the hardware unit.
 {reg: [
   {bits: 1,  name: 'v'},
   {bits: 1,  name: 'ce'},
-  {bits: 1,  name: 'de'},
-  {bits: 1,  name: 'ue'},
+  {bits: 1,  name: 'ude'},
+  {bits: 1,  name: 'uue'},
   {bits: 2,  name: 'pri'},
   {bits: 1,  name: 'mo'},
   {bits: 1,  name: 'c'},
@@ -449,12 +449,13 @@ the hardware unit.
 The error record holds a valid error log if the `v` field is 1.
 
 If the detected error was corrected then `ce` is set to 1. If the detected error
-was deferred then `de` is set to 1. If the detected error could not be corrected
-or deferred and thus needs urgent handling by an RAS handler, then the `ue` bit
-is set to 1. If the error record does not log a class of errors (e.g., does not
-support UDE), then the corresponding bit may be hardwired to 0. If the bits
-corresponding to more than one error class are set to 1 then the error record
-holds information about the highest severity error class among the bits set.
+could not be corrected but was deferred then `ude` is set to 1. If the detected
+error could not be corrected or deferred and thus needs urgent handling by an
+RAS handler, then the `uue` bit is set to 1. If the error record does not log a
+class of errors (e.g., does not support UDE), then the corresponding bit may be
+hardwired to 0. If the bits corresponding to more than one error class are set
+to 1 then the error record holds information about the highest severity error
+class among the bits set.
 
 When `v` is 1, if more errors of the same class as the error currently logged in
 the error record occur then the multiple-occurrence (`mo`) bit is set to indicate
