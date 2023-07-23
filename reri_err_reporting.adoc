@@ -2,8 +2,9 @@
 
 Components (e.g., a RISC-V hart, a memory controller, etc.) in a system that
 support error detection may implement one or more banks of error records. Each
-error record corresponds to a hardware unit of the component and reports errors
-detected by that hardware unit. A hardware unit may implement multiple error
+error bank may implement one or more error records. Each error record
+corresponds to one or more hardware units of the component and reports errors
+detected by those hardware units. A hardware unit may implement multiple error
 records. One or more error records may be valid at any instance of time due to
 one or more hardware units in the component detecting an error or due to a
 hardware unit having detected one or more errors.
@@ -72,7 +73,7 @@ range from 0 to 62.
 [width=100%]
 [%header, cols="^9,9,^3, 27"]
 |===
-|Offset       |Name               |Size|Description                        
+|Offset       |Name               |Size|Description
 |  0          |`vendor_n_imp_id`  |8   |Vendor and implementation ID.
 |  8          |`bank_info`        |8   |Error bank information.
 | 16          |`valid_summary`    |8   |Summary of valid error records.
@@ -91,7 +92,7 @@ range from 0 to 62.
 
 All registers and register fields defined by this specification are WARL unless
 noted otherwise. While all registers and register fields of an error bank and
-the error records in an error bank must exist, is legal to implemnt a register
+the error records in an error bank must exist, is legal to implement a register
 and/or register field of as read-only zero or a read-only legal value if they
 are not required to report errors information in an implementation.
 
@@ -101,15 +102,15 @@ The number of error banks, the number of error records in an error bank and the
 amount of information reported in an error record may be implemented to meet the
 needs of the implementation. The error records are only required to implement the
 registers and register fields needed to report error information that is legally
-produceed by the implementation. 
+produced by the implementation.
 
 For example:
 
 * If an error record does not support reporting a timestamp with the error then
-  the `timestamp_i` register may be implemented as read-only zero. When
-  reporting a timestamp is supported, the width of the timestamp is
-  implementation defined and only bits needed to hold a legal timestamp value
-  need be implemented.
+  the `timestamp_i` register and the `tsv` field of the `status_i` register may
+  be implemented as read-only zero. When reporting a timestamp is supported, the
+  width of the timestamp is implementation defined and only bits needed to hold
+  a legal timestamp value need be implemented.
 
 * If an implementation does not report additional information or additional
   supplemental information in the error record then the `info_i` and/or
@@ -120,16 +121,22 @@ For example:
 * The `addr_i` register and the address type field in `status_i` register
   only needs to implement bits and encodings needed to report the legal
   addresses supported by the implementation. If an error record does
-  not report of addresses then the entire register may be read-only zero.
+  not report of addresses then the entire register may be read-only zero and the
+  the validity indicators in `status_i` may be be read-only zero.
 
 * The `valid_summary` register may be read-only zero if the implementation does
   not support reporting a summary of valid error records in an error bank.
 
 * If corrected error counting is not supported by an implementation then the
-  `cec` and `ceco` fields of the `status_i` register may be read-only zero.
+  `cec` and `ceco` fields of the `status_i` register and the `cece` field of the
+  `control_i` register may be read-only zero.
 
 * If error record injection capability is not supported then the `eid` field
   of the `control_i` register may be read-only zero.
+
+A minimal system may have one error bank with one error record occupying 128
+bytes in the memory-map and all registers other than the `bank_info`,
+`control_i` and the `status_i` registers may be read-only zero.
 
 ====
 
@@ -149,7 +156,7 @@ the logged errors to process the error condition. In some cases, the RAS handler
 may not be able to do such processing. For example, the system may be unable to
 support execution of the RAS handler and cause a RAS initiated reset. Preserving
 the information logged in error records across such resets allows reporting of
-unhandled errors that occured in a previous boot of the system.
+unhandled errors that occurred in a previous boot of the system.
 ====
 
 All registers in an error bank must have the same reset behavior.
@@ -214,10 +221,11 @@ versions of the register layout. Software should first read the `version` field
 and use the value to determine the register layout.
 ====
 
-The `inst_id` field identifies a unique instance, within a package or at least a
-silicon die, of the component; ideally unique in the whole system. The `inst_id`
-are defined by the vendor of the system as a unique identifier for the component.
-A value of 0 may be returned to indicate the field is not implemented.
+The `inst_id` field identifies a unique instance of an error bank, within a
+package or at least a silicon die, of the component; ideally unique in the whole
+system. The `inst_id` are defined by the vendor of the system as a unique
+identifier for the component. A value of 0 may be returned to indicate the field
+is not implemented.
 
 [NOTE]
 ====
@@ -341,7 +349,7 @@ interrupt/event notification be also used to carry additional information to aid
 the RAS handler in the platform.
 
 The RAS handler may be implemented by a RISC-V application processor hart
-in the system, a dedicated RAS handling microcontroller, a finite state machine,
+in the system, a dedicated RAS handling micro-controller, a finite state machine,
 etc.
 
 The error signals may be configured, through platform specific means, to notify
@@ -418,8 +426,8 @@ the hardware unit.
 {reg: [
   {bits: 1,  name: 'v'},
   {bits: 1,  name: 'ce'},
-  {bits: 1,  name: 'de'},
-  {bits: 1,  name: 'ue'},
+  {bits: 1,  name: 'ude'},
+  {bits: 1,  name: 'uue'},
   {bits: 2,  name: 'pri'},
   {bits: 1,  name: 'mo'},
   {bits: 1,  name: 'c'},
@@ -441,15 +449,16 @@ the hardware unit.
 The error record holds a valid error log if the `v` field is 1.
 
 If the detected error was corrected then `ce` is set to 1. If the detected error
-was deferred then `de` is set to 1. If the detected error could not be corrected
-or deferred and thus needs urgent handling by an RAS handler, then the `ue` bit
-is set to 1. If the error record does not log a class of errors (e.g., does not
-support UDE), then the corresponding bit may be hardwired to 0. If the bits
-corresponding to more than one error class are set to 1 then the error record
-holds information about the highest severity error class among the bits set.
+could not be corrected but was deferred then `ude` is set to 1. If the detected
+error could not be corrected or deferred and thus needs urgent handling by an
+RAS handler, then the `uue` bit is set to 1. If the error record does not log a
+class of errors (e.g., does not support UDE), then the corresponding bit may be
+hardwired to 0. If the bits corresponding to more than one error class are set
+to 1 then the error record holds information about the highest severity error
+class among the bits set.
 
 When `v` is 1, if more errors of the same class as the error currently logged in
-the error record occur then the multiple-occurence (`mo`) bit is set to indicate
+the error record occur then the multiple-occurrence (`mo`) bit is set to indicate
 the multiple occurrence of errors of the same severity. See <<OVERWRITE_RULES>>
 for rules on overwriting the error record in such cases.
 
@@ -681,7 +690,7 @@ Components that are field replaceable units or detect errors in connected field
 replacement units may log additional information in the `info_i` register to
 help identify the failing component. For example, a memory controller may log
 the memory channel associated with the error such as the DIMM channel, bank,
-column, row, rank, subRank, device ID, etc. 
+column, row, rank, subRank, device ID, etc.
 
 ====
 
@@ -771,7 +780,7 @@ The rules for writing the error record are as follows:
     else
         // There is a no valid error recorded. The new error is recorded.
         // The severity of the new error may be one of UUE, UDE, or CE.
-        // The sticky error history is cleard and the multiple occurrence
+        // The sticky error history is cleared and the multiple occurrence
         // flag is set to 0.
         status_i.uue = new_status.uue
         status_i.ude = new_status.ude & ~new_status.uue
@@ -841,7 +850,7 @@ The RISC-V system components such as PCIe root ports or PCIe Root Complex Event
 Collectors may themselves implement error reporting compliant with the RISC-V
 RERI specification and thus provide a unified error reporting mechanism in such
 systems. For example, a root complex event collector may support an error record
-to report errors logged in the AER log registers. 
+to report errors logged in the AER log registers.
 ====
 
 === Error code encodings
@@ -858,7 +867,7 @@ to report errors logged in the AER log registers.
 |   4        | Cache scrubbing detected (e.g., ECC error on cache data) error
 |   5        | Cache address/control state (e.g., parity error tag or state) error
 |   6        | Cache unspecified error
-|   7        | Snoop-filter/directory address/control state 
+|   7        | Snoop-filter/directory address/control state
                (e.g., ECC error on tag or state) error
 |   8        | Snoop-filter/directory unspecified error
 |   9        | TLB/Page-walk cache data (e.g., ECC error on TLB data) error
@@ -882,7 +891,7 @@ to report errors logged in the AER log registers.
 |  23        | Protocol Error - illegal/unexpected state error
 |  24        | Protocol Error - timeout error
 |  25        | System internal controller (power management, security, etc.) error
-|  26        | Deferred error passthrough (e.g., forwarding poisoned data to a
+|  26        | Deferred error pass-through (e.g., forwarding poisoned data to a
                bus that cannot carry poison indicator) not supported
 |  27        | PCIe/CXL component detected (e.g., errors were logged into PCIe AER,
                CXL.mem error log, etc.) errors
