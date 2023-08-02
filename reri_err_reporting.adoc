@@ -104,40 +104,12 @@ needs of the implementation. The error records are only required to implement th
 registers and register fields needed to report error information that is legally
 produced by the implementation.
 
-For example:
-
-* If an error record does not support reporting a timestamp with the error then
-  the `timestamp_i` register and the `tsv` field of the `status_i` register may
-  be implemented as read-only zero. When reporting a timestamp is supported, the
-  width of the timestamp is implementation defined and only bits needed to hold
-  a legal timestamp value need be implemented.
-
-* If an implementation does not report additional information or additional
-  supplemental information in the error record then the `info_i` and/or
-  `suppl_info_i` registers and their validity indicators in `status_i` may be
-  read-only zero. Where information is reported in these registers, the error
-  record only needs to implement the bits needed to report the information.
-
-* The `addr_i` register and the address type field in `status_i` register
-  only needs to implement bits and encodings needed to report the legal
-  addresses supported by the implementation. If an error record does
-  not report of addresses then the entire register may be read-only zero and the
-  the validity indicators in `status_i` may be be read-only zero.
-
-* The `valid_summary` register may be read-only zero if the implementation does
-  not support reporting a summary of valid error records in an error bank.
-
-* If corrected error counting is not supported by an implementation then the
-  `cec` and `ceco` fields of the `status_i` register and the `cece` field of the
-  `control_i` register may be read-only zero.
-
-* If error record injection capability is not supported then the `eid` field
-  of the `control_i` register may be read-only zero.
-
-A minimal system may have one error bank with one error record occupying 128
-bytes in the memory-map and all registers other than the `bank_info`,
-`control_i` and the `status_i` registers may be read-only zero.
-
+A minimal implementation with one error bank, which contains one error record
+only consumes 128 bytes of address space. In terms of storage, the minimal
+implementation can come down to a single bit of storage for the `v` (valid) bit
+in the `status_i` register in the single error record. All other register fields
+of the bank header and error record are WARL and may be hardwired to read-only
+zero or read-only one as appropriate.
 ====
 
 === Reset behavior
@@ -161,7 +133,7 @@ unhandled errors that occurred in a previous boot of the system.
 
 All registers in an error bank must have the same reset behavior.
 
-=== Error bank registers
+=== Error bank header registers
 
 ==== Vendor and implementation ID (`vendor_n_imp_id`)
 
