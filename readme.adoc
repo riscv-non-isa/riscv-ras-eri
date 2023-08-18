@@ -2,6 +2,7 @@
 
 This document is capturing discussions at the RERI TG.
 This is not an official specification and everything in this document may change.
+The TG community page is located here: https://lists.riscv.org/g/tech-ras-eri
 
 = License
 
