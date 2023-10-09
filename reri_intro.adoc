@@ -2,8 +2,9 @@
 
 == Introduction
 
-The RERI specification augments RAS features in the SoC with a standard
-mechanism for reporting errors by means of a memory-mapped register
+The RAS Error Record Register Interface (RERI) specification augments
+Reliability, Availability, and Servciceability (RAS) features in the SoC with a
+standard mechanism for reporting errors by means of a memory-mapped register
 interface to enable error reporting, provide the facility to log the detected
 errors (including their severity, nature, and location), and configuring means
 to signal the error to a RAS handler component. The RAS handler may use this
@@ -13,8 +14,7 @@ the system, etc. to recover from the errors. Additionally, this specification
 shall support software-initiated error logging, reporting, and testing of RAS
 handlers. Lastly, this specification shall provide maximal flexibility to
 implement error handling and shall co-exist with RAS frameworks defined by other
-standards such as PCIe, CXL, etc.
-
+standards such as PCIe cite:[PCI] and CXL cite:[CXL].
 
 A system is an entity that interacts with other entities such as other systems,
 software, operators, etc. to deliver one or more services in its role as a
@@ -238,7 +238,10 @@ between hardware components and error errors/banks.
 [%header, cols="5,20"]
 |===
 | Term            ^| Definition
-| CE               | Corrected error.
+| AER              | Advanced Error Reporting. A PCIe capability to support
+                     advanced error control and reporting.
+| BMC              | Baseboard Management Controller.
+| CE               | Corrected Error.
 | Custom           | A register or data structure field designated for custom
                      use. Software that is not aware of the custom use must
                      ignore custom fields and preserve value held in these
@@ -251,14 +254,31 @@ between hardware components and error errors/banks.
                      information that may be treated as instructions that are
                      fetched and executed, as well as data that is loaded and
                      stored.
+| DIMM             | Dual-in-line memory module. A packaging arrangement of
+                     memory devices on a socketable substrate.
+| DRAM             | Dynamic random-access memory. Devices made using Dynamic
+                     RAM circuit configurations that have data storage that must
+                     be refreshed periodically.
+| ECC              | Error correcting code.
 | Error Reporting  | Error reporting is the process of logging information
                      (including their severity, nature, and location) about
                      a detected error in an error record and signaling, if
                      required, the occurrence of the error to an appropriate
                      RAS handler.
+| FSM              | Finite-state machine. An abstract machine that can be in
+                     exactly one of a finite number of states at any time.
 | GPA              | Guest Physical Address. See Priv. specification.
 | ID               | Identifier.
+| IOMMU            | Input-Output Memory Management Unit. A system-level
+                     Memory Management Unit (MMU) that connects 
+                     direct-memory-accesscapable Input/Output (I/O) devices to
+                     system memory.
+| NMI              | Non-Maskable interrupt. See Priv. specification.
 | OS               | Operating system.
+| PLL              | Phase-locked loop. A control system that generates an
+                     output signal whose phase is related to the phase of an
+                     input signal. PLLs are commonly used to perform clock
+                     synthesis.
 | PCIe             | Peripheral Component Interconnect Express bus standard.
 | RAS              | Reliability, Availability, and Serviceability.
 | RERI             | RAS error record register interface.
@@ -289,9 +309,11 @@ between hardware components and error errors/banks.
                      bits has no effect. +
                      If the optional feature that introduces the bit is not
                      implemented, the bit must be read-only and hardwired to Zero
+| SDE              | Silent data error.
 | SOC              | System on a chip, also referred as system-on-a-chip and
                      system-on-chip.
 | SPA              | Supervisor Physical Address. See Priv. specification.
+| TLB              | Translation lookaside buffer.
 | VA               | Virtual Address. See Priv. specification.
 | UDE              | Uncorrected deferred error.
 | UUE              | Uncorrected urgent error.
