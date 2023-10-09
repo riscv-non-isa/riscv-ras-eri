@@ -327,8 +327,9 @@ etc.
 The error signals may be configured, through platform specific means, to notify
 a RAS handler in the platform. For example, the High-priority RAS signal
 may be configured to cause a High-priority RAS local interrupt, an external
-interrupt, or an NMI and the Low-priority RAS signal may be configured to cause
-a Low-priority RAS local interrupt or an external interrupt.
+interrupt, or an Non-maskable interrupt (NMI) and the Low-priority RAS signal
+may be configured to cause a Low-priority RAS local interrupt or an external
+interrupt.
 ====
 
 If the error record supports corrected-error counting then the
@@ -501,8 +502,8 @@ hardwire this field to 0. The encodings of the `at` field are listed in
 [NOTE]
 ====
 The component specific address types may be used to report addresses such as a
-local bus address, a DRAM address, etc. The interpretation of such addresses is
-component specific.
+local bus address, a dynamic random-access memory (DRAM) address, etc. The
+interpretation of such addresses is component specific.
 
 A set of component specific encodings are defined to allow a platform to use an
 encoding per type of component specific addresses.
@@ -655,14 +656,14 @@ failing component, guide recovery actions, determine whether the error is
 transient or permanent, etc. The field may be used to report more detailed
 information about the location of the error within the component, for example,
 the set and way where the error was detected, the parity group that was in error,
-the ECC syndrome, a protocol FSM state, the input that caused an assertion to
-fail, etc.
+the ECC syndrome, a protocol finite-state machine (FSM) state, the input that
+caused an assertion to fail, etc.
 
 Components that are field replaceable units or detect errors in connected field
 replacement units may log additional information in the `info_i` register to
 help identify the failing component. For example, a memory controller may log
-the memory channel associated with the error such as the DIMM channel, bank,
-column, row, rank, subRank, device ID, etc.
+the memory channel associated with the error such as the dual in-line memory
+module (DIMM) channel, bank, column, row, rank, subRank, device ID, etc.
 
 ====
 
@@ -822,7 +823,7 @@ The RISC-V system components such as PCIe root ports or PCIe Root Complex Event
 Collectors may themselves implement error reporting compliant with the RISC-V
 RERI specification and thus provide a unified error reporting mechanism in such
 systems. For example, a root complex event collector may support an error record
-to report errors logged in the AER log registers.
+to report errors logged in the Advanced Error Reporting (AER) log registers.
 ====
 
 === Error code encodings
