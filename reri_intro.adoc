@@ -84,11 +84,11 @@ A service failure occurs when the service deviates from its specification due
 to errors.
 
 A reliable system deals with errors through one or more of the following
-techniques:
+techniques cite:[RAS_TAX] cite:[EXA_RAS]:
 
 * Fault prevention
 * Error detection and correction
-* Error forecasting
+* Error prediction
 
 === Fault Prevention
 
@@ -98,7 +98,7 @@ the use of high quality in product design, technology selection, materials
 selection, and manufacturing time screening for defects. Through the use of
 systematic design, technology selection, and manufacturing tests many errors
 such as those induced by electric fields, temperature stress, switching/coupling
-noise (e.g. DRAM RowHammer effect), incorrect V/F operating points,
+noise (e.g. DRAM RowHammer cite:[RHAM] effect), incorrect V/F operating points,
 insufficient guard bands, meta-stability, etc. can be prevented.
 
 Faults that are not prevented may manifest as errors during operation of the
@@ -117,13 +117,13 @@ possible by implementing error detection capabilities.
 
 === Error Detection and Correction
 
-Error detection involves the use of coding and protocols to detect errors. For
-example, caches with error correcting codes, TLB entries with parity protection,
-buses with parity protection on transaction fields, circuitry to detect
-unexpected and/or illegal encodings, gray codes, voltage sensors, clock/PLL
-monitors, timing margin sensors, etc. Some components such as memory controllers
-may actively attempt to detect errors using techniques such as periodic
-background scrubbing or on-demand scrubbing.
+Error detection involves the use of coding and protocols to detect errors
+cite:[EU_HPC] cite:[EXA_2014]. For example, caches with error correcting codes,
+TLB entries with parity protection, buses with parity protection on transaction
+fields, circuitry to detect unexpected and/or illegal encodings, gray codes,
+voltage sensors, clock/PLL monitors, timing margin sensors, etc. Some components
+such as memory controllers may actively attempt to detect errors using techniques
+such as periodic background scrubbing or on-demand scrubbing.
 
 Error correction involves the use of techniques to correct the detected errors.
 Error correction may be performed by employing error correcting codes and
@@ -196,22 +196,22 @@ Management Controller (BMC), an on-chip service controller, etc.) to initiate a
 RAS-handling reset to restart the component, sub-system, or the system itself to
 restore correct service operations.
 
-=== Error Forecasting
-Error forecasting involves the use of corrected errors as a predictor of future
+=== Error Prediction
+Error prediction involves the use of corrected errors as a predictor of future
 uncorrectable permanent failures or other systemic issues such as marginality
 due to aging, etc. A future service failure could be avoided if the corrected
-errors can be monitored. To support such monitoring components in a resilient
-system may include counters to count the corrections performed. Such components
-may further include a threshold or support a programmable threshold to notify
-a RAS handler when the number of corrected errors exceeds the threshold. A
-component may also track history of corrected errors and determine if the
-corrected errors are being triggered by transient faults or permanent faults.
-For example, a cache may detect that certain cells are repeatedly causing
-errors, a bus may detect that a certain lane is stuck at a logic level and
-causing errors, etc. In such cases the system may be able to continue operation
-due to error correction ability but may still raise a notification to a RAS
-handler such that maintenance can be scheduled to replace the failing
-components in the system.
+errors can be monitored cite:[DRAM_WILD]. To support such monitoring components
+in a resilient system may include counters to count the corrections performed.
+Such components may further include a threshold or support a programmable
+threshold to notify a RAS handler when the number of corrected errors exceeds
+the threshold. A component may also track history of corrected errors and
+determine if the corrected errors are being triggered by transient faults or
+permanent faults. For example, a cache may detect that certain cells are
+repeatedly causing errors, a bus may detect that a certain lane is stuck at a
+logic level and causing errors, etc. In such cases the system may be able to
+continue operation due to error correction ability but may still raise a
+notification to a RAS handler such that maintenance can be scheduled to
+replace the failing components in the system.
 
 === RERI Features
 
