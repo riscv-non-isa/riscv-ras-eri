@@ -110,7 +110,7 @@ exceptions and cause a service failure due to silent data corruption. For
 example, a circuit performing encryption of a database may silently cause an
 error in the ciphertext produced leading to the entire database being left in a
 state where it cannot be decrypted. Such undetected errors that do not lead to a
-service failure are called silent data errors (SDE). The impact of SDE is
+service failure are called Silent Data Errors (SDE). The impact of SDE is
 generally much higher than errors that lead to a service failure. A resilient
 system attempts to minimize the probability of SDE to the largest extent
 possible by implementing error detection capabilities.
@@ -134,12 +134,12 @@ may invalidate the entry and attempt to refill it from the page tables, a
 receiver on a bus that detects an error may request the transmitter to
 retransmit the transaction, etc. Error correction is thus complete when the
 error is either corrected or it does not recur on retry. Such errors that were
-corrected by the hardware are called *corrected errors (CE)*.
+corrected by the hardware are called *Corrected Errors (CE)*.
 
 Errors that could not be corrected are called uncorrected errors. A component
 that detects an uncorrected error may allow possibly corrupted data to
 propagate to the requester of the data but associate an indicator (e.g., poison)
-with the data. Such errors are said to be *uncorrected deferred errors (UDE)* as
+with the data. Such errors are said to be *Uncorrected Deferred Errors (UDE)* as
 they allow the component to continue operation and defer dealing with the error
 to a later point in time if the data corrupted by the error is consumed. Deferring
 errors allows deferring the error handling to an ultimate consumer of the
@@ -158,7 +158,7 @@ data is only partially written then the data continues to be marked as poisoned.
 
 A component that detects an uncorrected error may be unable to defer the
 handling of the error by techniques such as poisoning. Such errors are said to
-be *uncorrected urgent errors (UUE)* and a RAS handler is invoked as
+be *Uncorrected Urgent Errors (UUE)* and a RAS handler is invoked as
 immediate remedial actions are required. For example, a cache controller
 may detect an uncorrectable ECC error on the memory used to hold cache tags
 and since such errors cannot be attributed to any particular data element
@@ -191,8 +191,8 @@ any further requests, the link connecting the memory module to the host may have
 failed, etc. In such cases invoking a RAS handler may not be useful
 as the RAS handler itself may need to generate requests to the failed component
 to perform the recovery actions. Components in such failed states may use an
-implementation-defined signal to a system recovery controller (e.g., a board
-management controller (BMC), an on-chip service controller, etc.) to initiate a
+implementation-defined signal to a system recovery controller (e.g., a Baseboard
+Management Controller (BMC), an on-chip service controller, etc.) to initiate a
 RAS-handling reset to restart the component, sub-system, or the system itself to
 restore correct service operations.
 
@@ -254,18 +254,18 @@ between hardware components and error errors/banks.
                      information that may be treated as instructions that are
                      fetched and executed, as well as data that is loaded and
                      stored.
-| DIMM             | Dual-in-line memory module. A packaging arrangement of
+| DIMM             | Dual-In-line Memory Module. A packaging arrangement of
                      memory devices on a socketable substrate.
 | DRAM             | Dynamic random-access memory. Devices made using Dynamic
                      RAM circuit configurations that have data storage that must
                      be refreshed periodically.
-| ECC              | Error correcting code.
+| ECC              | Error Correcting Code.
 | Error Reporting  | Error reporting is the process of logging information
                      (including their severity, nature, and location) about
                      a detected error in an error record and signaling, if
                      required, the occurrence of the error to an appropriate
                      RAS handler.
-| FSM              | Finite-state machine. An abstract machine that can be in
+| FSM              | Finite-State Machine. An abstract machine that can be in
                      exactly one of a finite number of states at any time.
 | GPA              | Guest Physical Address. See Priv. specification.
 | ID               | Identifier.
@@ -274,8 +274,8 @@ between hardware components and error errors/banks.
                      direct-memory-accesscapable Input/Output (I/O) devices to
                      system memory.
 | NMI              | Non-Maskable interrupt. See Priv. specification.
-| OS               | Operating system.
-| PLL              | Phase-locked loop. A control system that generates an
+| OS               | Operating System.
+| PLL              | Phase-Locked Loop. A control system that generates an
                      output signal whose phase is related to the phase of an
                      input signal. PLLs are commonly used to perform clock
                      synthesis.
@@ -287,7 +287,7 @@ between hardware components and error errors/banks.
                      software. Software must ignore reserved fields in registers
                      and preserve the value held in these fields when writing
                      values to other fields in the same register.
-| RO               | Read-only - Register bits are read-only and cannot be altered
+| RO               | Read-Only - Register bits are read-only and cannot be altered
                      by software. Where explicitly defined, these bits are used
                      to reflect changing hardware state, and as a result bit
                      values can be observed to change at run time. +
@@ -299,24 +299,24 @@ between hardware components and error errors/banks.
                      If the optional feature that is associated with the bits is
                      not implemented, the bits are permitted to be hardwired to
                      Zero.
-| RW1C             | Write-1-to-clear status - Register bits indicate status when
+| RW1C             | Write-1-to-Clear status - Register bits indicate status when
                      read. A Set bit indicates a status event which is Cleared by
                      writing a 1b. Writing a 0b to RW1C bits has no effect. +
                      If the optional feature that would Set the bit is not
                      implemented, the bit must be read-only and hardwired to Zero
-| RW1S             | Read-Write-1-to-set - register bits indicate status when
+| RW1S             | Read-Write-1-to-Set - register bits indicate status when
                      read. The bit may be Set by writing 1b. Writing a 0b to RW1S
                      bits has no effect. +
                      If the optional feature that introduces the bit is not
                      implemented, the bit must be read-only and hardwired to Zero
-| SDE              | Silent data error.
-| SOC              | System on a chip, also referred as system-on-a-chip and
-                     system-on-chip.
+| SDE              | Silent Data Error.
+| SOC              | System On a Chip, also referred as System-On-a-Chip and
+                     System-On-Chip.
 | SPA              | Supervisor Physical Address. See Priv. specification.
-| TLB              | Translation lookaside buffer.
+| TLB              | Translation Lookaside Buffer.
 | VA               | Virtual Address. See Priv. specification.
-| UDE              | Uncorrected deferred error.
-| UUE              | Uncorrected urgent error.
+| UDE              | Uncorrected Deferred Error.
+| UUE              | Uncorrected Urgent Error.
 | WARL             | Write Any values, Reads Legal values: Attribute of a
                      register field that is only defined for a subset of bit
                      encodings, but allow any value to be written while
