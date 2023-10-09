@@ -90,7 +90,7 @@ techniques:
 * Error detection and correction
 * Error forecasting
 
-=== Fault prevention
+=== Fault Prevention
 
 Fault prevention involves use of techniques that reduce or prevent errors that
 may occur after the product has been shipped. These may be accomplished through
@@ -213,7 +213,7 @@ due to error correction ability but may still raise a notification to a RAS
 handler such that maintenance can be scheduled to replace the failing
 components in the system.
 
-=== RERI features
+=== RERI Features
 
 Version 1.0 of the RISC-V RERI specification supports the following features:
 

@@ -62,7 +62,7 @@ A error bank that is otherwise available for memory-mapped accesses must respond
 with all zero data on reads and must ignore writes to unimplemented registers in
 the page.
 
-=== Register layout
+=== Register Layout
 
 The error bank registers are organized as a 64-byte header providing information
 about the error bank followed by an array of 64-byte error records. The offset
@@ -112,7 +112,7 @@ of the bank header and error record are WARL and may be hardwired to read-only
 zero or read-only one as appropriate.
 ====
 
-=== Reset behavior
+=== Reset Behavior
 
 The reset value is `UNSPECIFIED` for RERI registers.
 
@@ -133,9 +133,9 @@ unhandled errors that occurred in a previous boot of the system.
 
 All registers in an error bank must have the same reset behavior.
 
-=== Error bank header registers
+=== Error Bank Header Registers
 
-==== Vendor and implementation ID (`vendor_n_imp_id`)
+==== Vendor and Implementation ID (`vendor_n_imp_id`)
 
 The `vendor_n_imp_id` register is a read-only register and its layout is:
 
@@ -167,7 +167,7 @@ determine the format of fields and encodings that are `UNSPECIFIED` by this
 specification.
 ====
 
-==== Error bank information (`bank_info`)
+==== Error Bank Information (`bank_info`)
 
 The `bank_info` is a read-only register and its layout is as follows:
 
@@ -215,7 +215,7 @@ error records of an error bank are located in the 4 KiB memory mapped region
 reserved for the error bank such that the first error record is at offset 64
 and the last error record at offset (64 + 63 * `n_err_recs`).
 
-==== Summary of valid error records (`valid_summary`)
+==== Summary of Valid Error Records (`valid_summary`)
 
 The `valid_summary` is a read-only register and its layout is as follows:
 
@@ -241,9 +241,9 @@ records in the bank are valid. If this bit is 0 then software must read the
 if there is a valid error logged in that error record.
 ====
 
-=== Error record registers
+=== Error Record Registers
 
-==== Control register (`control_i`)
+==== Control Register (`control_i`)
 
 The `control_i` is a read/write WARL register used to control error reporting by
 the corresponding error record in the error bank. The layout of this register
@@ -388,7 +388,7 @@ be misused to maliciously inject hardware errors that may lead to security
 issues.
 ====
 
-==== Status register (`status_i`)
+==== Status Register (`status_i`)
 
 The `status_i` is a read-write WARL register that reports errors detected by
 the hardware unit.
@@ -625,7 +625,7 @@ read-modify-write of the status register).
 When an UUE or UDE error is logged in an error record, the `cec` and `ceco` fields
 of the error record are not modified and retain their values.
 
-==== Address register (`addr_i`)
+==== Address Register (`addr_i`)
 
 The `addr_i` WARL register reports the address associated with the
 detected error when `status_i.at` is not 0. If `status_i.at` is 0, the value in
@@ -638,7 +638,7 @@ fields may be zeroes. Some of the highest address bits may be fixed or may be
 sign-extensions or may be zero-extensions of the next lowest address bit
 depending on the type of address reported.
 
-==== Information register (`info_i`)
+==== Information Register (`info_i`)
 
 The `info_i` WARL register provides additional information about the error when
 `status_i.iv` is 1. If `status_i.iv` is 0, the value in this register is
@@ -667,7 +667,7 @@ Module (DIMM) channel, bank, column, row, rank, subRank, device ID, etc.
 
 ====
 
-==== Supplemental information register (`suppl_info_i`)
+==== Supplemental Information Register (`suppl_info_i`)
 
 The `suppl_info_i` WARL register provides additional information about the error
 when `status_i.siv` is 1. This information may supplement the information
@@ -679,7 +679,7 @@ The format of the register is `UNSPECIFIED` by this specification. This field
 may be interpreted using the error code in `status_i.ec` along with
 implementation specific and implementation defined format and rules.
 
-==== Timestamp register (`timestamp_i`)
+==== Timestamp Register (`timestamp_i`)
 
 The `timestamp_i` WARL register provides a timestamp for the last error recorded
 in the error record if `status_i.tsv` is 1. When `status.tsv` is 0, the value in
@@ -697,7 +697,7 @@ global counter (e.g, mtime, etc.), or other implementation specific means.
 ====
 
 [[OVERWRITE_RULES]]
-=== Error record overwrite rules
+=== Error Record Overwrite Rules
 
 When a hardware unit detects an error it may find its error record still valid
 due to an earlier detected error that has not yet been consumed by software.
@@ -804,7 +804,7 @@ When a new error is recorded by the hardware unit in `status_i` register of its
 error record then the signal configured in the `control_i` register for error is
 asserted.
 
-=== Error reporting defined by other standards
+=== Error Reporting Defined by Other Standards
 
 Standards such as PCIe cite:[PCI] and CXL cite:[CXL] define standardized error
 reporting architectures such as the PCIe Advanced Error Reporting (AER).
@@ -826,7 +826,7 @@ systems. For example, a root complex event collector may support an error record
 to report errors logged in the Advanced Error Reporting (AER) log registers.
 ====
 
-=== Error code encodings
+=== Error Code Encodings
 
 [[EC_ENCODINGS]]
 .Error code encodings
