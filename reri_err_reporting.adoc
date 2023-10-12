@@ -230,6 +230,8 @@ The `valid_summary` is a read-only register and its layout is as follows:
 ], config:{lanes: 4, hspace:1024}}
 ....
 
+<<<
+
 The `sv` bit when 1 indicates that the `valid_bitmap` provides a summary of the
 `valid` bits from the status registers of this error bank. If this bit is 0
 then the error bank does not provide a summary of valid bits and the
@@ -714,10 +716,10 @@ overwritten by a higher severity error (UDE/CE by UUE, UDE by UUE, or CE by
 UUE/UDE), the status bits indicating the severity of the older errors are
 retained (i.e., are sticky).
 
-When an error writes or overwrites an error record, the `cec` and `ceco` fields
-of the `status_i` are updated by CEs and retain their value for errors of other
-severity. When implemented the `cec` counts occurrence of CE and an
-unsigned integer overflow detected on increment of `cec` sets `ceco` to 1.
+When an error writes or overwrites an error record, the `status_i.cec` and
+`status_i.ceco` fields update from CEs and retain value for errors of other
+severity. When implemented, `cec` counts CE occurrences; unsigned integer
+overflow on `cec` increment sets `ceco` to 1.
 
 The rules for writing the error record are as follows:
 
@@ -828,6 +830,8 @@ RERI specification and thus provide a unified error reporting mechanism in such
 systems. For example, a root complex event collector may support an error record
 to report errors logged in the Advanced Error Reporting (AER) log registers.
 ====
+
+<<<
 
 === Error Code Encodings
 
