@@ -2,8 +2,9 @@
 
 == Introduction
 
-The RERI specification augments RAS features in the SoC with a standard
-mechanism for reporting errors by means of a memory-mapped register
+The RAS Error Record Register Interface (RERI) specification augments
+Reliability, Availability, and Servciceability (RAS) features in the SoC with a
+standard mechanism for reporting errors by means of a memory-mapped register
 interface to enable error reporting, provide the facility to log the detected
 errors (including their severity, nature, and location), and configuring means
 to signal the error to a RAS handler component. The RAS handler may use this
@@ -13,8 +14,7 @@ the system, etc. to recover from the errors. Additionally, this specification
 shall support software-initiated error logging, reporting, and testing of RAS
 handlers. Lastly, this specification shall provide maximal flexibility to
 implement error handling and shall co-exist with RAS frameworks defined by other
-standards such as PCIe, CXL, etc.
-
+standards such as PCIe cite:[PCI] and CXL cite:[CXL].
 
 A system is an entity that interacts with other entities such as other systems,
 software, operators, etc. to deliver one or more services in its role as a
@@ -84,13 +84,13 @@ A service failure occurs when the service deviates from its specification due
 to errors.
 
 A reliable system deals with errors through one or more of the following
-techniques:
+techniques cite:[RAS_TAX] cite:[EXA_RAS]:
 
 * Fault prevention
 * Error detection and correction
-* Error forecasting
+* Error prediction
 
-=== Fault prevention
+=== Fault Prevention
 
 Fault prevention involves use of techniques that reduce or prevent errors that
 may occur after the product has been shipped. These may be accomplished through
@@ -98,7 +98,7 @@ the use of high quality in product design, technology selection, materials
 selection, and manufacturing time screening for defects. Through the use of
 systematic design, technology selection, and manufacturing tests many errors
 such as those induced by electric fields, temperature stress, switching/coupling
-noise (e.g. DRAM RowHammer effect), incorrect V/F operating points,
+noise (e.g. DRAM RowHammer cite:[RHAM] effect), incorrect V/F operating points,
 insufficient guard bands, meta-stability, etc. can be prevented.
 
 Faults that are not prevented may manifest as errors during operation of the
@@ -110,20 +110,20 @@ exceptions and cause a service failure due to silent data corruption. For
 example, a circuit performing encryption of a database may silently cause an
 error in the ciphertext produced leading to the entire database being left in a
 state where it cannot be decrypted. Such undetected errors that do not lead to a
-service failure are called silent data errors (SDE). The impact of SDE is
+service failure are called Silent Data Errors (SDE). The impact of SDE is
 generally much higher than errors that lead to a service failure. A resilient
 system attempts to minimize the probability of SDE to the largest extent
 possible by implementing error detection capabilities.
 
 === Error Detection and Correction
 
-Error detection involves the use of coding and protocols to detect errors. For
-example, caches with error correcting codes, TLB entries with parity protection,
-buses with parity protection on transaction fields, circuitry to detect
-unexpected and/or illegal encodings, gray codes, voltage sensors, clock/PLL
-monitors, timing margin sensors, etc. Some components such as memory controllers
-may actively attempt to detect errors using techniques such as periodic
-background scrubbing or on-demand scrubbing.
+Error detection involves the use of coding and protocols to detect errors
+cite:[EU_HPC] cite:[EXA_2014]. For example, caches with error correcting codes,
+TLB entries with parity protection, buses with parity protection on transaction
+fields, circuitry to detect unexpected and/or illegal encodings, gray codes,
+voltage sensors, clock/PLL monitors, timing margin sensors, etc. Some components
+such as memory controllers may actively attempt to detect errors using techniques
+such as periodic background scrubbing or on-demand scrubbing.
 
 Error correction involves the use of techniques to correct the detected errors.
 Error correction may be performed by employing error correcting codes and
@@ -134,12 +134,12 @@ may invalidate the entry and attempt to refill it from the page tables, a
 receiver on a bus that detects an error may request the transmitter to
 retransmit the transaction, etc. Error correction is thus complete when the
 error is either corrected or it does not recur on retry. Such errors that were
-corrected by the hardware are called *corrected errors (CE)*.
+corrected by the hardware are called *Corrected Errors (CE)*.
 
 Errors that could not be corrected are called uncorrected errors. A component
 that detects an uncorrected error may allow possibly corrupted data to
 propagate to the requester of the data but associate an indicator (e.g., poison)
-with the data. Such errors are said to be *uncorrected deferred errors (UDE)* as
+with the data. Such errors are said to be *Uncorrected Deferred Errors (UDE)* as
 they allow the component to continue operation and defer dealing with the error
 to a later point in time if the data corrupted by the error is consumed. Deferring
 errors allows deferring the error handling to an ultimate consumer of the
@@ -158,7 +158,7 @@ data is only partially written then the data continues to be marked as poisoned.
 
 A component that detects an uncorrected error may be unable to defer the
 handling of the error by techniques such as poisoning. Such errors are said to
-be *uncorrected urgent errors (UUE)* and a RAS handler is invoked as
+be *Uncorrected Urgent Errors (UUE)* and a RAS handler is invoked as
 immediate remedial actions are required. For example, a cache controller
 may detect an uncorrectable ECC error on the memory used to hold cache tags
 and since such errors cannot be attributed to any particular data element
@@ -191,29 +191,29 @@ any further requests, the link connecting the memory module to the host may have
 failed, etc. In such cases invoking a RAS handler may not be useful
 as the RAS handler itself may need to generate requests to the failed component
 to perform the recovery actions. Components in such failed states may use an
-implementation-defined signal to a system recovery controller (e.g., a board
-management controller (BMC), an on-chip service controller, etc.) to initiate a
+implementation-defined signal to a system recovery controller (e.g., a Baseboard
+Management Controller (BMC), an on-chip service controller, etc.) to initiate a
 RAS-handling reset to restart the component, sub-system, or the system itself to
 restore correct service operations.
 
-=== Error Forecasting
-Error forecasting involves the use of corrected errors as a predictor of future
+=== Error Prediction
+Error prediction involves the use of corrected errors as a predictor of future
 uncorrectable permanent failures or other systemic issues such as marginality
 due to aging, etc. A future service failure could be avoided if the corrected
-errors can be monitored. To support such monitoring components in a resilient
-system may include counters to count the corrections performed. Such components
-may further include a threshold or support a programmable threshold to notify
-a RAS handler when the number of corrected errors exceeds the threshold. A
-component may also track history of corrected errors and determine if the
-corrected errors are being triggered by transient faults or permanent faults.
-For example, a cache may detect that certain cells are repeatedly causing
-errors, a bus may detect that a certain lane is stuck at a logic level and
-causing errors, etc. In such cases the system may be able to continue operation
-due to error correction ability but may still raise a notification to a RAS
-handler such that maintenance can be scheduled to replace the failing
-components in the system.
+errors can be monitored cite:[DRAM_WILD]. To support such monitoring components
+in a resilient system may include counters to count the corrections performed.
+Such components may further include a threshold or support a programmable
+threshold to notify a RAS handler when the number of corrected errors exceeds
+the threshold. A component may also track history of corrected errors and
+determine if the corrected errors are being triggered by transient faults or
+permanent faults. For example, a cache may detect that certain cells are
+repeatedly causing errors, a bus may detect that a certain lane is stuck at a
+logic level and causing errors, etc. In such cases the system may be able to
+continue operation due to error correction ability but may still raise a
+notification to a RAS handler such that maintenance can be scheduled to
+replace the failing components in the system.
 
-=== RERI features
+=== RERI Features
 
 Version 1.0 of the RISC-V RERI specification supports the following features:
 
@@ -238,7 +238,10 @@ between hardware components and error errors/banks.
 [%header, cols="5,20"]
 |===
 | Term            ^| Definition
-| CE               | Corrected error.
+| AER              | Advanced Error Reporting. A PCIe capability to support
+                     advanced error control and reporting.
+| BMC              | Baseboard Management Controller.
+| CE               | Corrected Error.
 | Custom           | A register or data structure field designated for custom
                      use. Software that is not aware of the custom use must
                      ignore custom fields and preserve value held in these
@@ -251,14 +254,31 @@ between hardware components and error errors/banks.
                      information that may be treated as instructions that are
                      fetched and executed, as well as data that is loaded and
                      stored.
+| DIMM             | Dual-In-line Memory Module. A packaging arrangement of
+                     memory devices on a socketable substrate.
+| DRAM             | Dynamic random-access memory. Devices made using Dynamic
+                     RAM circuit configurations that have data storage that must
+                     be refreshed periodically.
+| ECC              | Error Correcting Code.
 | Error Reporting  | Error reporting is the process of logging information
                      (including their severity, nature, and location) about
                      a detected error in an error record and signaling, if
                      required, the occurrence of the error to an appropriate
                      RAS handler.
+| FSM              | Finite-State Machine. An abstract machine that can be in
+                     exactly one of a finite number of states at any time.
 | GPA              | Guest Physical Address. See Priv. specification.
 | ID               | Identifier.
-| OS               | Operating system.
+| IOMMU            | Input-Output Memory Management Unit. A system-level
+                     Memory Management Unit (MMU) that connects 
+                     direct-memory-accesscapable Input/Output (I/O) devices to
+                     system memory.
+| NMI              | Non-Maskable interrupt. See Priv. specification.
+| OS               | Operating System.
+| PLL              | Phase-Locked Loop. A control system that generates an
+                     output signal whose phase is related to the phase of an
+                     input signal. PLLs are commonly used to perform clock
+                     synthesis.
 | PCIe             | Peripheral Component Interconnect Express bus standard.
 | RAS              | Reliability, Availability, and Serviceability.
 | RERI             | RAS error record register interface.
@@ -267,7 +287,7 @@ between hardware components and error errors/banks.
                      software. Software must ignore reserved fields in registers
                      and preserve the value held in these fields when writing
                      values to other fields in the same register.
-| RO               | Read-only - Register bits are read-only and cannot be altered
+| RO               | Read-Only - Register bits are read-only and cannot be altered
                      by software. Where explicitly defined, these bits are used
                      to reflect changing hardware state, and as a result bit
                      values can be observed to change at run time. +
@@ -279,22 +299,24 @@ between hardware components and error errors/banks.
                      If the optional feature that is associated with the bits is
                      not implemented, the bits are permitted to be hardwired to
                      Zero.
-| RW1C             | Write-1-to-clear status - Register bits indicate status when
+| RW1C             | Write-1-to-Clear status - Register bits indicate status when
                      read. A Set bit indicates a status event which is Cleared by
                      writing a 1b. Writing a 0b to RW1C bits has no effect. +
                      If the optional feature that would Set the bit is not
                      implemented, the bit must be read-only and hardwired to Zero
-| RW1S             | Read-Write-1-to-set - register bits indicate status when
+| RW1S             | Read-Write-1-to-Set - register bits indicate status when
                      read. The bit may be Set by writing 1b. Writing a 0b to RW1S
                      bits has no effect. +
                      If the optional feature that introduces the bit is not
                      implemented, the bit must be read-only and hardwired to Zero
-| SOC              | System on a chip, also referred as system-on-a-chip and
-                     system-on-chip.
+| SDE              | Silent Data Error.
+| SOC              | System On a Chip, also referred as System-On-a-Chip and
+                     System-On-Chip.
 | SPA              | Supervisor Physical Address. See Priv. specification.
+| TLB              | Translation Lookaside Buffer.
 | VA               | Virtual Address. See Priv. specification.
-| UDE              | Uncorrected deferred error.
-| UUE              | Uncorrected urgent error.
+| UDE              | Uncorrected Deferred Error.
+| UUE              | Uncorrected Urgent Error.
 | WARL             | Write Any values, Reads Legal values: Attribute of a
                      register field that is only defined for a subset of bit
                      encodings, but allow any value to be written while
