@@ -1,4 +1,4 @@
-= Error Reporting
+== Error Reporting
 
 Components (e.g., a RISC-V hart, a memory controller, etc.) in a system that
 support error detection may implement one or more banks of error records. Each
@@ -865,7 +865,7 @@ to report errors logged in the Advanced Error Reporting (AER) log registers.
 |  15        | Interconnect other (e.g., parity error on address bus) error
 |  16        | Internal watchdog error
 |  17        | Internal datapath, memory, or execution units error
-               (e.g, ALU datapath parity error, ECC error in routing table, etc.)
+               (e.g, ALU datapath parity)
 |  18        | System memory command/address bus error
 |  19        | System memory unspecified error
 |  20        | System memory data (e.g., ECC error in SDRAM or HBM) error
@@ -874,8 +874,7 @@ to report errors logged in the Advanced Error Reporting (AER) log registers.
 |  23        | Protocol Error - illegal/unexpected state error
 |  24        | Protocol Error - timeout error
 |  25        | System internal controller (power management, security, etc.) error
-|  26        | Deferred error pass-through (e.g., forwarding poisoned data to a
-               bus that cannot carry poison indicator) not supported
+|  26        | Deferred error pass-through (e.g., forwarding poisoned data) not supported
 |  27        | PCIe/CXL detected (e.g., logged into PCIe AER,
                CXL.mem error log, etc.) errors
 |  28 - 63   | Reserved for future standard use
