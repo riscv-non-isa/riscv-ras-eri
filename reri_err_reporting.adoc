@@ -167,7 +167,7 @@ determine the format of fields and encodings that are `UNSPECIFIED` by this
 specification.
 ====
 
->>>
+<<<
 
 ==== Error Bank Information (`bank_info`)
 
@@ -296,7 +296,7 @@ and UUE respectively when they are logged (i.e. when `else` is 1). Enables for
 unsupported classes of errors may be hardwired to 0. The encodings of these
 fields are specified in <<ERR_SIG_ENABLES>>.
 
->>>
+<<<
 
 [[ERR_SIG_ENABLES]]
 .Error signaling enable field encodings
@@ -490,7 +490,7 @@ in the `addr_i` register. A error record that does not report addresses may
 hardwire this field to 0. The encodings of the `at` field are listed in
 <<AT_ENCODINGS>>.
 
->>>
+<<<
 
 [[AT_ENCODINGS]]
 .Address type encodings

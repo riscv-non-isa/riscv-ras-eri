@@ -225,7 +225,7 @@ Version 1.0 of the RISC-V RERI specification supports the following features:
 * Corrected error counting.
 * Error record injection for RAS handler testing.
 
->>>
+<<<
 
 This specification is intended to accommodate a wide variety of systems
 designs and needs - from high-end server-class systems to low-end embedded
