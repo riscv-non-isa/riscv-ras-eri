@@ -1,4 +1,4 @@
-== Error Reporting
+= Error Reporting
 
 Components (e.g., a RISC-V hart, a memory controller, etc.) in a system that
 support error detection may implement one or more banks of error records. Each
@@ -354,6 +354,8 @@ causes the `v` (valid) field of the associated `status_i` register to be
 cleared. The `sinv` field always returns 0 on read. The `sinv` bit enables
 software to read out and invalidate an error record without needing to
 explicitly write the `status_i` register.
+
+<<<
 
 [NOTE]
 ====
@@ -783,6 +785,8 @@ The rules for writing the error record are as follows:
 
 ----
 
+<<<
+
 If the `status_i.v`, `status_i.mo`, and `status_i.uue` are all 1 then the RAS
 handler should preferably restart the system to bring it to a correct state as
 an UUE record has been lost. If the `status_i.v` and `status_i.mo` are 1 but
@@ -862,8 +866,7 @@ to report errors logged in the Advanced Error Reporting (AER) log registers.
 |  16        | Internal watchdog error
 |  17        | Internal datapath, memory, or execution units error
                (e.g, ALU datapath parity error, ECC error in routing table, etc.)
-|  18        | System memory command/address bus (e.g., CRC error on address bus)
-               error
+|  18        | System memory command/address bus error
 |  19        | System memory unspecified error
 |  20        | System memory data (e.g., ECC error in SDRAM or HBM) error
 |  21        | System Memory scrubbing detected error
@@ -873,7 +876,7 @@ to report errors logged in the Advanced Error Reporting (AER) log registers.
 |  25        | System internal controller (power management, security, etc.) error
 |  26        | Deferred error pass-through (e.g., forwarding poisoned data to a
                bus that cannot carry poison indicator) not supported
-|  27        | PCIe/CXL component detected (e.g., errors were logged into PCIe AER,
+|  27        | PCIe/CXL detected (e.g., logged into PCIe AER,
                CXL.mem error log, etc.) errors
 |  28 - 63   | Reserved for future standard use
 |  64 - 255  | Designated for custom use
