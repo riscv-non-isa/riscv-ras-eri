@@ -197,21 +197,31 @@ RAS-handling reset to restart the component, sub-system, or the system itself to
 restore correct service operations.
 
 === Error Prediction
+
 Error prediction involves the use of corrected errors as a predictor of future
-uncorrectable permanent failures or other systemic issues such as marginality
-due to aging, etc. A future service failure could be avoided if the corrected
-errors can be monitored cite:[DRAM_WILD]. To support such monitoring components
-in a resilient system may include counters to count the corrections performed.
-Such components may further include a threshold or support a programmable
-threshold to notify a RAS handler when the number of corrected errors exceeds
-the threshold. A component may also track history of corrected errors and
-determine if the corrected errors are being triggered by transient faults or
-permanent faults. For example, a cache may detect that certain cells are
-repeatedly causing errors, a bus may detect that a certain lane is stuck at a
-logic level and causing errors, etc. In such cases the system may be able to
-continue operation due to error correction ability but may still raise a
-notification to a RAS handler such that maintenance can be scheduled to
-replace the failing components in the system.
+uncorrectable permanent failures or other systemic issues, such as marginality
+due to aging. Monitoring corrected errors may facilitate the avoidance of future
+service failures.
+
+Studies indicate that the probability of an uncorrected DRAM error is elevated
+if the DIMM previously experienced corrected errors cite:[DRAM_WILD]
+cite:[SRI_2012] cite:[ZIV_2019]. Such reasoning is used by system protection
+mechanisms, which utilize simple heuristics for offlining potentially failing
+memory pages cite:[HWA_2012] cite:[MEZ_2015] cite:[TANG_2006] cite:[DU_2021] or
+for replacing compromised DIMMs cite:[MAR_2014] cite:[DRAM_WILD]
+cite:[DU:EDCC2020].
+
+Reporting of detected and corrected hardware errors is requisite for any
+quantitative analysis of system resilience and for the prediction of future
+uncorrected errors cite:[EU_HPC]. This prediction capability facilitates the
+deployment of preventive mechanisms, such as pre-failure alerts in
+High-Performance Computing (HPC) cluster management software, thus mitigating
+the costs associated with unscheduled outages and system repairs.
+
+Components of a resilient system may also include corrected error counters to
+count the corrections performed. Such components may additionally include a
+fixed or programmable threshold to notify a RAS handler when the number of
+corrected errors surpasses the threshold.
 
 === RERI Features
 
@@ -270,6 +280,11 @@ between hardware components and error errors/banks.
 | FSM              | Finite-State Machine. An abstract machine that can be in
                      exactly one of a finite number of states at any time.
 | GPA              | Guest Physical Address. See Priv. specification.
+| HPC              | High-performance Computing. High-Performance Computing
+                     (HPC) refers to the use of parallel processing techniques
+                     to solve complex computational problems. It enables faster
+                     data processing and simulation by leveraging multiple
+                     processors or servers.
 | ID               | Identifier.
 | IOMMU            | Input-Output Memory Management Unit. A system-level
                      Memory Management Unit (MMU) that connects 
