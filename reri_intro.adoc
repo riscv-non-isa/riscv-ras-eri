@@ -208,8 +208,7 @@ if the DIMM previously experienced corrected errors cite:[DRAM_WILD]
 cite:[SRI_2012] cite:[ZIV_2019]. Such reasoning is used by system protection
 mechanisms, which utilize simple heuristics for offlining potentially failing
 memory pages cite:[HWA_2012] cite:[MEZ_2015] cite:[TANG_2006] cite:[DU_2021] or
-for replacing compromised DIMMs cite:[MAR_2014] cite:[DRAM_WILD]
-cite:[DU:EDCC2020].
+for replacing compromised DIMMs cite:[MAR_2014] cite:[DRAM_WILD] cite:[DU_2020].
 
 Reporting of detected and corrected hardware errors is requisite for any
 quantitative analysis of system resilience and for the prediction of future
@@ -234,8 +233,6 @@ Version 1.0 of the RISC-V RERI specification supports the following features:
   records.
 * Corrected error counting.
 * Error record injection for RAS handler testing.
-
-<<<
 
 This specification is intended to accommodate a wide variety of systems
 designs and needs - from high-end server-class systems to low-end embedded
