@@ -477,10 +477,11 @@ The `c` bit is WARL.
 
 [NOTE]
 ====
-For example, a RISC-V hart by causing the precise data corruption exception on
+For example, a RISC-V hart by causing the precise hardware error exception on
 attempts to consume corrupted/poisoned data may contain the error to the program
 currently executing on the hart. Such errors may be reported with the `c` bit
-set to 1.
+set to 1 indicating that the interrupted context may be restarted if the RAS
+handler is able to perform a suitable recovery operation.
 
 While the `c` bit indicates that the error may be containable the RAS handler
 may or may not be able to recover the system from such errors. The RAS handler
