@@ -77,8 +77,8 @@ range from 0 to 62.
 |  0          |`vendor_n_imp_id`  |8   |Vendor and implementation ID.
 |  8          |`bank_info`        |8   |Error bank information.
 | 16          |`valid_summary`    |8   |Summary of valid error records.
-| 24          | Reserved          |16  |Reserved for future standard use.
-| 40          | Custom            |24  |Designated for custom use.
+| 24          | Reserved          |32  |Reserved for future standard use.
+| 56          | Custom            |8   |Designated for custom use.
 | 64 + 64 * i |`control_i`        |8   |Control register of error record i.
 | 72 + 64 * i |`status_i`         |8   |Status register of error record i.
 | 80 + 64 * i |`addr_i`           |8   |Address register of error record i.
@@ -87,14 +87,14 @@ range from 0 to 62.
                                         error record i.
 |104 + 64 * i |`timestamp_i`      |8   |Timestamp register of error record i.
 |112 + 64 * i | Reserved          |8   |Reserved for future standard use.
-|120 + 64 * i | Custom            |8   |Designated for custom use.
+|120 + 64 * i | Reserved          |8   |Reserved for future standard use.
 |===
 
 All registers and register fields defined by this specification are WARL unless
 noted otherwise. While all registers and register fields of an error bank and
 the error records in an error bank must exist, is legal to implement a register
 and/or register field of as read-only zero or a read-only legal value if they
-are not required to report errors information in an implementation.
+are not required to report error information in an implementation.
 
 [NOTE]
 ====
