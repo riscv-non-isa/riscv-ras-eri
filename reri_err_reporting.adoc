@@ -258,15 +258,15 @@ is as follows:
 {reg: [
   {bits: 1,  name: 'else'},
   {bits: 1,  name: 'cece'},
-  {bits: 1,  name: 'sinv'},
-  {bits: 1,  name: 'WPRI'},
   {bits: 2,  name: 'ces'},
   {bits: 2,  name: 'udes'},
   {bits: 2,  name: 'uues'},
-  {bits: 22, name: 'WPRI'},
+  {bits: 24, name: 'WPRI'},
   {bits: 16, name: 'eid'},
-  {bits: 8,  name: 'WPRI'},
-  {bits: 8,  name: 'custom'},
+  {bits: 1,  name: 'sinv'},
+  {bits: 1,  name: 'WPRI'},
+  {bits: 10, name: 'WPRI'},
+  {bits: 4,  name: 'custom'},
 ], config:{lanes: 4, hspace:1024}}
 ....
 
