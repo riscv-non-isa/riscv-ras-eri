@@ -264,7 +264,7 @@ is as follows:
   {bits: 24, name: 'WPRI'},
   {bits: 16, name: 'eid'},
   {bits: 1,  name: 'sinv'},
-  {bits: 1,  name: 'WPRI'},
+  {bits: 1,  name: 'srdp'},
   {bits: 10, name: 'WPRI'},
   {bits: 4,  name: 'custom'},
 ], config:{lanes: 4, hspace:1024}}
@@ -348,11 +348,24 @@ the signal configured in the `ces` field. When `cece` is 1, the logging of a CE
 in the error record does not cause an error signal and an error signal
 configured in `ces` occurs only on a `cec` overflow.
 
+The set-read-in-progress (`srdp`) field, when written with a value of 1, causes
+the `rdip` (read-in-progress) bit of the associated `status_i` register to be
+set. The `srdp` field always returns 0 on read. The `rdip` field in the
+`status_i` register is set to 1 by hardware when an error is recorded in an
+invalid error record causing the `v` field to change from 0 to 1. The `rdip`
+field is cleared to 0 by hardware when a new error overwrites a valid (`v=1`)
+error record.
+
 The status-register-invalidate (`sinv`) bit, when written with a value of 1,
 causes the `v` (valid) field of the associated `status_i` register to be
-cleared. The `sinv` field always returns 0 on read. The `sinv` bit enables
-software to read out and invalidate an error record without needing to
-explicitly write the `status_i` register.
+cleared if the `rdip` field in the `status_i` register is also 1. The `sinv`
+field always returns 0 on read. The `sinv` field enables software to read out
+and invalidate an error record without needing to explicitly write the
+`status_i` register. Qualifying the clearing of the `v` field with `rdip` field
+being 1 prevents losing information about an overwrite that might have occurred
+while reading of the error record is in progress. If the `sinv` and `srdp` are
+both written to 1 together then the `rdip` bit is set and the `v` bit is cleared
+to 0.
 
 <<<
 
@@ -361,8 +374,14 @@ explicitly write the `status_i` register.
 Software may determine if the error record was read atomically by first reading
 the registers of the error record, then clearing the valid in `status_i` by
 writing 1 to `control_i.sinv` and then reading the `status_i` register again to
-determine if the value (besides the `v` field) changed. If a change was detected
-then the process may be repeated to read the latest reported error.
+determine if the `v` field was cleared to 0. If the `v` field is is still 1 but
+the `rdip` field is 0 then it indicative of an overwrite that may have occurred
+during the process of reading the error record. If the `v` field is 1 and the
+`rdip` is also 1 then it indicates a new error was recorded after the `v` field
+was cleared; but the read of the error record to collect the previous error was
+atomic. If an overwrite occurred during the process of reading the error record
+then the process may be repeated, after setting the `rdip` field, to read the
+latest reported error.
 ====
 
 The error-injection-delay (`eid`) is a WARL field used to control error record
@@ -419,14 +438,16 @@ the hardware unit.
   {bits: 2,  name: 'WPRI'},
   {bits: 1,  name: 'scrub'},
   {bits: 1,  name: 'ceco'},
-  {bits: 2,  name: 'WPRI'},
+  {bits: 1,  name: 'WPRI'},
+  {bits: 1,  name: 'rdip'},
   {bits: 8,  name: 'ec'},
   {bits: 16, name: 'WPRI'},
   {bits: 16, name: 'cec'},
 ], config:{lanes: 4, hspace:1024}}
 ....
 
-The error record holds a valid error log if the `v` field is 1.
+The error record holds a valid error log if the `v` field is 1. The `status_i`
+register does not accept a software write when the `v` field is 1.
 
 If the detected error was corrected then `ce` is set to 1. If the detected error
 could not be corrected but was deferred then `ude` is set to 1. If the detected
@@ -610,6 +631,13 @@ to a standard `ec` encoding then such errors may be reported using a custom
 encoding. The custom encodings have the most significant bit set to 1 to
 differentiate them from the standard encodings.
 
+The read-in-progress (`rdip`) field is set to 1 by hardware when a new error is
+recorded in an invalid status register and is cleared to 0 by hardware when a
+valid status register is overwritten. When `control_i.sinv` field is written to
+1, the `v` field is cleared to 0 only if `rdip` field is 1. Gating the clearing
+of the `v` field by the `rdip` field being 1 allows software to detect an
+overwrite that may occur while it is in process of reading an error record.
+
 An error record that supports the 1 setting of the `cece` field in `control_i`,
 implements a corrected-error-counter in the `cec` field. The `cec` is a WARL
 field. When `cece` is 1, the `cec` is incremented on each CE in addition to
@@ -637,10 +665,11 @@ maintained across logged errors).
 
 If software needs to initialize the `cec` and/or `ceco`, then a software write
 to the `status_i` register is appropriate. Before performing the write, software
-should first check for and read any valid error record and then write the register
-with the new `cec` and/or `ceco` value and with `v=0` (Or, if software for some
-reason wants to leave an existing valid error log in place, it should do a
-read-modify-write of the status register).
+should first check for and read any valid error record, invalidate the error
+record, and then write the register with the new `cec` and/or `ceco` value and
+with `v=0`. If `status_i` register write was not accepted due to hardware
+writing a new error into the record and setting the `v` field to 1, then software
+should repeat this process.
 ====
 
 When an UUE or UDE error is logged in an error record, the `cec` and `ceco` fields
@@ -752,7 +781,8 @@ The rules for writing the error record are as follows:
             // the highest severity, followed by UDE, and then CE. When a error
             // record is overwritten by a higher severity error, the status bits
             // indicating the severity of the older errors are retained
-            // (i.e., are sticky).
+            // (i.e., are sticky). The rdip flag is cleared to 0.
+            status_i.rdip = 0
             status_i.uue |= new_status.uue
             status_i.ude |= new_status.ude
             status_i.ce |= new_status.ce
@@ -761,8 +791,9 @@ The rules for writing the error record are as follows:
         endif
         if ( severity(new_status) == severity(status_i) )
             // Indicate occurrence of second error of same severity by setting
-            // the multiple-occurrence (MO) field to 1
+            // the multiple-occurrence (MO) field to 1 and rdip is cleared to 0
             status_i.mo = 1
+            status_i.rdip = 0
             // When the two errors have same severity the priority of
             // the errors (as determined by status_i.pri) is used to
             // determine if the error record is overwritten. Higher
@@ -775,7 +806,8 @@ The rules for writing the error record are as follows:
         // There is a no valid error recorded. The new error is recorded.
         // The severity of the new error may be one of UUE, UDE, or CE.
         // The sticky error history is cleared and the multiple occurrence
-        // flag is set to 0.
+        // flag is set to 0. The rdip is set to 1.
+        status_i.rdip = 1
         status_i.uue = new_status.uue
         status_i.ude = new_status.ude & ~new_status.uue
         status_i.ce = new_status.ce & ~new_status.uue & ~new_status.ude
