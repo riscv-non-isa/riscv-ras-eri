@@ -436,7 +436,10 @@ RAS handler, then the `uue` bit is set to 1. If the error record does not log a
 class of errors (e.g., does not support UDE), then the corresponding bit may be
 hardwired to 0. If the bits corresponding to more than one error class are set
 to 1 then the error record holds information about the highest severity error
-class among the bits set.
+class among the bits set. The error record may be used to provide an
+informational update by setting the `v` bit to 1 and setting `ce`, `ude`, and
+`uue` bits to 0. Such informational updates are signaled using the signal
+configured in `control_i.ces`.
 
 When `v` is 1, if more errors of the same class as the error currently logged in
 the error record occur then the multiple-occurrence (`mo`) bit is set to indicate
@@ -447,8 +450,8 @@ Each error of an error class (CE, UDE, or UUE) that may be logged in an error
 record may be associated with a priority which is a number between 0 and 3;
 priority value of 3 being the highest priority and priority value of 0 being the
 lowest priority. The priority values indicate relative priority among errors of
-the same error class. Among errors of different error classes the priority
-values are unrelated.
+the same error class and therefore represent sub-classes of errors. Among errors
+of different error classes the priority values are unrelated.
 
 [NOTE]
 ====
