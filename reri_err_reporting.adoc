@@ -472,18 +472,30 @@ hardwire this field to 0.
 The error record overwrite rules use the error class (CE, UDE, or UUE) and the
 error priority (`pri`) as specified in <<OVERWRITE_RULES>>.
 
-When an error occurs the containable (`c`) bit may be set to 1 to indicate
+When an UUE occurs the containable (`c`) bit may be set to 1 to indicate
 that the error has not propagated beyond the boundaries of the hardware unit
 that detected the error and thus may be *containable* through recovery actions
 (e.g., terminating the computation, etc.) carried out by the RAS handler.
-The `c` bit is WARL.
+The `c` bit is WARL. For error classes other than UUE, the interpretation of
+the `c` bit may be specified in a future standard extension.
+
+For a RISC-V hart, some UUE may cause a Hardware Error exception cite:[PRIV].
+A Hardware Error is a synchronous exception, triggered when corrupted or
+uncorrectable data is accessed, either explicitly or implicitly, by an
+instruction. In this context, "data" encompasses all types of information used
+within a RISC-V hart.
 
 [NOTE]
 ====
-For example, a RISC-V hart by causing the precise data corruption exception on
+For example, a RISC-V hart by causing the precise hardware error exception on
 attempts to consume corrupted/poisoned data may contain the error to the program
 currently executing on the hart. Such errors may be reported with the `c` bit
-set to 1.
+set to 1 indicating that the interrupted context may be restarted if the RAS
+handler is able to perform a suitable recovery operation. The `__x__epc` CSR on
+delivery of the hardware error exception holds the address of the instruction
+that attempted to access corrupted data, while the `__x__tval` CSR is either set
+to 0 or holds the virtual address of an instruction fetch, load, or store that
+attempted to access corrupted data.
 
 While the `c` bit indicates that the error may be containable the RAS handler
 may or may not be able to recover the system from such errors. The RAS handler
