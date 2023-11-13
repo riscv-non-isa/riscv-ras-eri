@@ -177,21 +177,31 @@ The `bank_info` is a read-only register and its layout is as follows:
 ....
 {reg: [
   {bits: 16, name: 'inst_id'},
-  {bits: 16, name: 'n_err_recs'},
-  {bits: 24, name: 'WPRI'},
+  {bits:  6, name: 'n_err_recs'},
+  {bits:  2, name: 'layout'},
+  {bits: 32, name: 'WPRI'},
   {bits:  8, name: 'version'},
 ], config:{lanes: 2, hspace:1024}}
 ....
 
 The `version` field returns the version of the architectural register layout
 specification implemented by the error bank. The version defined by this
-specification is 0x01.
+specification is 0x01. The encodings 0xF? of this field are designated for
+custom use.
+
+The `layout` field along with the `version` field indicates the layout of the
+registers in the error bank and the error records. The encoding 0 indicates
+the register layout defined by this specification.
 
 [NOTE]
 ====
-The offset of the `version` field in the error bank shall not change across
-versions of the register layout. Software should first read the `version` field
-and use the value to determine the register layout.
+The offset of the `version` and the `layout` fields in the error bank shall not
+change across versions of the specification or the layouts defined by a version.
+Software should first read the `version` and `layout` fields and use the values
+to determine the register layout.
+
+The `layout` field may be used for future standard extensions to define segment
+specific extensions to the error bank and/or the error records.
 ====
 
 The `inst_id` field identifies a unique instance of an error bank, within a
@@ -212,9 +222,9 @@ software intimately familiar with that system implementation.
 
 The `n_err_recs` field indicates the number of error records implemented by the
 error bank. The field is allowed to have a unsigned value between 1 and 63. The
-error records of an error bank are located in the 4 KiB memory mapped region
-reserved for the error bank such that the first error record is at offset 64
-and the last error record at offset (64 + 63 * `n_err_recs`).
+error records of an error bank are located in the memory mapped region reserved
+for the error bank such that the first error record is at offset 64 and the last
+error record at offset (64 + 63 * `n_err_recs`).
 
 ==== Summary of Valid Error Records (`valid_summary`)
 
