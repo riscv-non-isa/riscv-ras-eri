@@ -81,7 +81,7 @@ range from 0 to 62.
 | 56          | Custom            |8   |Designated for custom use.
 | 64 + 64 * i |`control_i`        |8   |Control register of error record i.
 | 72 + 64 * i |`status_i`         |8   |Status register of error record i.
-| 80 + 64 * i |`addr_i`           |8   |Address register of error record i.
+| 80 + 64 * i |`addr_info_i`      |8   |Address-or-info. register of error record i.
 | 88 + 64 * i |`info_i`           |8   |Information register of error record i.
 | 96 + 64 * i |`suppl_info_i`     |8   |Supplemental information register of
                                         error record i.
@@ -442,7 +442,7 @@ the hardware unit.
   {bits: 1,  name: 'c'},
   {bits: 3,  name: 'tt'},
   {bits: 1,  name: 'iv'},
-  {bits: 4,  name: 'at'},
+  {bits: 4,  name: 'ait'},
   {bits: 1,  name: 'siv'},
   {bits: 1,  name: 'tsv'},
   {bits: 2,  name: 'WPRI'},
@@ -534,39 +534,39 @@ the error record such as the address of the memory where corruption was
 detected, etc.
 ====
 
-The address-type (`at`) is a WARL field indicates the type of address reported
-in the `addr_i` register. A error record that does not report addresses may
-hardwire this field to 0. The encodings of the `at` field are listed in
-<<AT_ENCODINGS>>.
+The address-or-info-type (`ait`) is a WARL field that indicates the type of
+information reported in the `addr_info_i` register. An error record that does
+not report information in this field may hardwire this field to 0. The encodings
+of the `ait` field are listed in <<AIT_ENCODINGS>>.
 
 <<<
 
-[[AT_ENCODINGS]]
-.Address type encodings
+[[AIT_ENCODINGS]]
+.Address-or-information type encodings
 [cols="^1,3", options="header"]
 |===
 | *Encoding* | *Description*
-| 0          | None. When `at` is 0, the contents of the `addr_i` register are
-               `UNSPECIFIED`.
+| 0          | None. The contents of the `addr_info_i` register are
+               `UNSPECIFIED` when `ait` is 0.
 | 1          | Supervisor Physical Address (SPA).
-| 2          | Guest Ahysical Address (GPA).
+| 2          | Guest Physical Address (GPA).
 | 3          | Virtual Address (VA).
-| 4-15       | Component specific.
+| 4-15       | Component-specific address or information.
 |===
 
 [NOTE]
 ====
-The component specific address types may be used to report addresses such as a
-local bus address, a Dynamic Random-Access Memory (DRAM) address, etc. The
-interpretation of such addresses is component specific.
+Component-specific information types, as defined in the range 4-15 of the `ait`
+field, may be used to report component-specific addresses or other
+component-specific information in the register. The component-specific addresses
+may include information such as a local bus address or a Dynamic Random-Access
+Memory (DRAM) address. The interpretation of such information is
+component-specific.
 
-A set of component specific encodings are defined to allow a platform to use an
-encoding per type of component specific addresses.
-
-The `addr_i` register must hold the address of type determined by the `at`
-field. Additional non-redundant information about the location accessed using
-the address (e.g., cache set and way, etc.) may be reported in the `info_i`
-register.
+When a standard address type (a VA, SPA, or GPA) is reported in the
+`addr_info_i` register, additional non-redundant information about the location
+accessed using the address (e.g., cache set and way, etc.) may be reported in
+the `info_i` and/or the `suppl_info_i` registers.
 ====
 
 The transaction-type (`tt`) is a WARL field to report the type of transaction
@@ -685,18 +685,24 @@ should repeat this process.
 When an UUE or UDE error is logged in an error record, the `cec` and `ceco` fields
 of the error record are not modified and retain their values.
 
-==== Address Register (`addr_i`)
+==== Address or information Register (`addr_info_i`)
 
-The `addr_i` WARL register reports the address associated with the
-detected error when `status_i.at` is not 0. If `status_i.at` is 0, the value in
-this register is `UNSPECIFIED`. An implementation that does not report addresses
-may hardwire this register to 0. Some fields of the register may be hardwired to
-zero if the field is unused to report any type of address. In general, to the
+The `addr_info_i` WARL register reports the address or other information
+associated with the detected error when `status_i.ait` is not 0. If
+`status_i.ait` is 0, the value in this register is `UNSPECIFIED`. An
+implementation that does not report information in this register may hardwire
+this register to 0. Some fields of this register may be hardwired to zero if the
+field is unused to report any type of address or information.
+
+When an address (a VA, GPA, or an SPA) is reported in this register, to the
 extent possible, the error record should capture all significant parts of the
-address. However as a function of the type of error being logged some address
+address. However, as a function of the type of error being logged some address
 fields may be zeroes. Some of the highest address bits may be fixed or may be
 sign-extensions or may be zero-extensions of the next lowest address bit
 depending on the type of address reported.
+
+When component specific information is reported in this register, the
+interpretation of the information is component specific.
 
 ==== Information Register (`info_i`)
 
@@ -834,8 +840,8 @@ The rules for writing the error record are as follows:
         status_i.tsv   = new_status.tsv
         status_i.scrub = new_status.scrub
         status_i.ec    = new_status.ec
-        // Update addr_i, info_i, suppl_info_i, timestamp_i with information, if
-        // valid, about the new error
+        // Update addr_info_i, info_i, suppl_info_i, timestamp_i with information,
+        // if valid, about the new error
         status_i.v = 1
     endif
 
