@@ -186,12 +186,13 @@ The `bank_info` is a read-only register and its layout is as follows:
 
 The `version` field returns the version of the architectural register layout
 specification implemented by the error bank. The version defined by this
-specification is 0x01. The encodings 0xF? of this field are designated for
-custom use.
+specification is 0x01. The encodings 0xF0 through 0xFF of this field are
+designated for custom use.
 
 The `layout` field along with the `version` field indicates the layout of the
-registers in the error bank and the error records. The encoding 0 indicates
-the register layout defined by this specification.
+registers in the error bank and the error records. The `layout` encoding 0
+indicates the registers are arranged and have meaning as defined by this
+specification.
 
 [NOTE]
 ====
@@ -632,7 +633,8 @@ cannot make this distinction then it may conservatively report this field as 0.
 When the error record is not associated with storage elements (e.g., correcting
 errors detected on bus transactions) this field may be hardwired to 0. If this
 property is unconditionally true for a hardware unit then this field may be
-hardwired to 1.
+hardwired to 1. For error classes other than CE, the interpretation of the `c`
+bit may be specified in a future standard extension.
 
 The error-code (`ec`) is a WARL field holds an error code that provides a
 description of the detected error. Standard `ec` encodings are defined in
