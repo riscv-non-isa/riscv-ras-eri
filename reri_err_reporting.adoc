@@ -77,17 +77,16 @@ range from 0 to 62.
 |  0          |`vendor_n_imp_id`  |8   |Vendor and implementation ID.
 |  8          |`bank_info`        |8   |Error bank information.
 | 16          |`valid_summary`    |8   |Summary of valid error records.
-| 24          | Reserved          |16  |Reserved for future standard use.
-| 40          | Custom            |24  |Designated for custom use.
+| 24          | Reserved          |32  |Reserved for future standard use.
+| 56          | Custom            |8   |Designated for custom use.
 | 64 + 64 * i |`control_i`        |8   |Control register of error record i.
 | 72 + 64 * i |`status_i`         |8   |Status register of error record i.
-| 80 + 64 * i |`addr_i`           |8   |Address register of error record i.
+| 80 + 64 * i |`addr_info_i`      |8   |Address-or-info. register of error record i.
 | 88 + 64 * i |`info_i`           |8   |Information register of error record i.
 | 96 + 64 * i |`suppl_info_i`     |8   |Supplemental information register of
                                         error record i.
 |104 + 64 * i |`timestamp_i`      |8   |Timestamp register of error record i.
-|112 + 64 * i | Reserved          |8   |Reserved for future standard use.
-|120 + 64 * i | Custom            |8   |Designated for custom use.
+|112 + 64 * i | Reserved          |16  |Reserved for future standard use.
 |===
 
 All registers and register fields defined by this specification are WARL unless
@@ -178,21 +177,32 @@ The `bank_info` is a read-only register and its layout is as follows:
 ....
 {reg: [
   {bits: 16, name: 'inst_id'},
-  {bits: 16, name: 'n_err_recs'},
-  {bits: 24, name: 'WPRI'},
+  {bits:  6, name: 'n_err_recs'},
+  {bits:  2, name: 'layout'},
+  {bits: 32, name: 'WPRI'},
   {bits:  8, name: 'version'},
 ], config:{lanes: 2, hspace:1024}}
 ....
 
 The `version` field returns the version of the architectural register layout
 specification implemented by the error bank. The version defined by this
-specification is 0x01.
+specification is 0x01. The encodings 0xF0 through 0xFF of this field are
+designated for custom use.
+
+The `layout` field along with the `version` field indicates the layout of the
+registers in the error bank and the error records. The `layout` encoding 0
+indicates the registers are arranged and have meaning as defined by this
+specification.
 
 [NOTE]
 ====
-The offset of the `version` field in the error bank shall not change across
-versions of the register layout. Software should first read the `version` field
-and use the value to determine the register layout.
+The offset of the `version` and the `layout` fields in the error bank shall not
+change across versions of the specification or the layouts defined by a version.
+Software should first read the `version` and `layout` fields and use the values
+to determine the register layout.
+
+The `layout` field may be used for future standard extensions to define segment
+specific extensions to the error bank and/or the error records.
 ====
 
 The `inst_id` field identifies a unique instance of an error bank, within a
@@ -213,9 +223,9 @@ software intimately familiar with that system implementation.
 
 The `n_err_recs` field indicates the number of error records implemented by the
 error bank. The field is allowed to have a unsigned value between 1 and 63. The
-error records of an error bank are located in the 4 KiB memory mapped region
-reserved for the error bank such that the first error record is at offset 64
-and the last error record at offset (64 + 63 * `n_err_recs`).
+error records of an error bank are located in the memory mapped region reserved
+for the error bank such that the first error record is at offset 64 and the last
+error record at offset (64 + 63 * `n_err_recs`).
 
 ==== Summary of Valid Error Records (`valid_summary`)
 
@@ -259,15 +269,15 @@ is as follows:
 {reg: [
   {bits: 1,  name: 'else'},
   {bits: 1,  name: 'cece'},
-  {bits: 1,  name: 'sinv'},
-  {bits: 1,  name: 'WPRI'},
   {bits: 2,  name: 'ces'},
   {bits: 2,  name: 'udes'},
   {bits: 2,  name: 'uues'},
-  {bits: 22, name: 'WPRI'},
+  {bits: 24, name: 'WPRI'},
   {bits: 16, name: 'eid'},
-  {bits: 8,  name: 'WPRI'},
-  {bits: 8,  name: 'custom'},
+  {bits: 1,  name: 'sinv'},
+  {bits: 1,  name: 'srdp'},
+  {bits: 10, name: 'WPRI'},
+  {bits: 4,  name: 'custom'},
 ], config:{lanes: 4, hspace:1024}}
 ....
 
@@ -349,11 +359,24 @@ the signal configured in the `ces` field. When `cece` is 1, the logging of a CE
 in the error record does not cause an error signal and an error signal
 configured in `ces` occurs only on a `cec` overflow.
 
+The set-read-in-progress (`srdp`) field, when written with a value of 1, causes
+the `rdip` (read-in-progress) bit of the associated `status_i` register to be
+set. The `srdp` field always returns 0 on read. The `rdip` field in the
+`status_i` register is set to 1 by hardware when an error is recorded in an
+invalid error record causing the `v` field to change from 0 to 1. The `rdip`
+field is cleared to 0 by hardware when a new error overwrites a valid (`v=1`)
+error record.
+
 The status-register-invalidate (`sinv`) bit, when written with a value of 1,
 causes the `v` (valid) field of the associated `status_i` register to be
-cleared. The `sinv` field always returns 0 on read. The `sinv` bit enables
-software to read out and invalidate an error record without needing to
-explicitly write the `status_i` register.
+cleared if the `rdip` field in the `status_i` register is also 1. The `sinv`
+field always returns 0 on read. The `sinv` field enables software to read out
+and invalidate an error record without needing to explicitly write the
+`status_i` register. Qualifying the clearing of the `v` field with `rdip` field
+being 1 prevents losing information about an overwrite that might have occurred
+while reading of the error record is in progress. If the `sinv` and `srdp` are
+both written to 1 together then the `rdip` bit is set and the `v` bit is cleared
+to 0.
 
 <<<
 
@@ -362,8 +385,14 @@ explicitly write the `status_i` register.
 Software may determine if the error record was read atomically by first reading
 the registers of the error record, then clearing the valid in `status_i` by
 writing 1 to `control_i.sinv` and then reading the `status_i` register again to
-determine if the value (besides the `v` field) changed. If a change was detected
-then the process may be repeated to read the latest reported error.
+determine if the `v` field was cleared to 0. If the `v` field is is still 1 but
+the `rdip` field is 0 then it indicative of an overwrite that may have occurred
+during the process of reading the error record. If the `v` field is 1 and the
+`rdip` is also 1 then it indicates a new error was recorded after the `v` field
+was cleared; but the read of the error record to collect the previous error was
+atomic. If an overwrite occurred during the process of reading the error record
+then the process may be repeated, after setting the `rdip` field, to read the
+latest reported error.
 ====
 
 The error-injection-delay (`eid`) is a WARL field used to control error record
@@ -414,20 +443,22 @@ the hardware unit.
   {bits: 1,  name: 'c'},
   {bits: 3,  name: 'tt'},
   {bits: 1,  name: 'iv'},
-  {bits: 4,  name: 'at'},
+  {bits: 4,  name: 'ait'},
   {bits: 1,  name: 'siv'},
   {bits: 1,  name: 'tsv'},
   {bits: 2,  name: 'WPRI'},
   {bits: 1,  name: 'scrub'},
   {bits: 1,  name: 'ceco'},
-  {bits: 2,  name: 'WPRI'},
+  {bits: 1,  name: 'WPRI'},
+  {bits: 1,  name: 'rdip'},
   {bits: 8,  name: 'ec'},
   {bits: 16, name: 'WPRI'},
   {bits: 16, name: 'cec'},
 ], config:{lanes: 4, hspace:1024}}
 ....
 
-The error record holds a valid error log if the `v` field is 1.
+The error record holds a valid error log if the `v` field is 1. The `status_i`
+register does not accept a software write when the `v` field is 1.
 
 If the detected error was corrected then `ce` is set to 1. If the detected error
 could not be corrected but was deferred then `ude` is set to 1. If the detected
@@ -436,7 +467,10 @@ RAS handler, then the `uue` bit is set to 1. If the error record does not log a
 class of errors (e.g., does not support UDE), then the corresponding bit may be
 hardwired to 0. If the bits corresponding to more than one error class are set
 to 1 then the error record holds information about the highest severity error
-class among the bits set.
+class among the bits set. The error record may be used to provide an
+informational update by setting the `v` bit to 1 and setting `ce`, `ude`, and
+`uue` bits to 0. Such informational updates are signaled using the signal
+configured in `control_i.ces`.
 
 When `v` is 1, if more errors of the same class as the error currently logged in
 the error record occur then the multiple-occurrence (`mo`) bit is set to indicate
@@ -447,8 +481,8 @@ Each error of an error class (CE, UDE, or UUE) that may be logged in an error
 record may be associated with a priority which is a number between 0 and 3;
 priority value of 3 being the highest priority and priority value of 0 being the
 lowest priority. The priority values indicate relative priority among errors of
-the same error class. Among errors of different error classes the priority
-values are unrelated.
+the same error class and therefore represent sub-classes of errors. Among errors
+of different error classes the priority values are unrelated.
 
 [NOTE]
 ====
@@ -469,18 +503,30 @@ hardwire this field to 0.
 The error record overwrite rules use the error class (CE, UDE, or UUE) and the
 error priority (`pri`) as specified in <<OVERWRITE_RULES>>.
 
-When an error occurs the containable (`c`) bit may be set to 1 to indicate
+When an UUE occurs the containable (`c`) bit may be set to 1 to indicate
 that the error has not propagated beyond the boundaries of the hardware unit
 that detected the error and thus may be *containable* through recovery actions
 (e.g., terminating the computation, etc.) carried out by the RAS handler.
-The `c` bit is WARL.
+The `c` bit is WARL. For error classes other than UUE, the interpretation of
+the `c` bit may be specified in a future standard extension.
+
+For a RISC-V hart, some UUE may cause a Hardware Error exception cite:[PRIV].
+A Hardware Error is a synchronous exception, triggered when corrupted or
+uncorrectable data is accessed, either explicitly or implicitly, by an
+instruction. In this context, "data" encompasses all types of information used
+within a RISC-V hart.
 
 [NOTE]
 ====
-For example, a RISC-V hart by causing the precise data corruption exception on
+For example, a RISC-V hart by causing the precise hardware error exception on
 attempts to consume corrupted/poisoned data may contain the error to the program
 currently executing on the hart. Such errors may be reported with the `c` bit
-set to 1.
+set to 1 indicating that the interrupted context may be restarted if the RAS
+handler is able to perform a suitable recovery operation. The `__x__epc` CSR on
+delivery of the hardware error exception holds the address of the instruction
+that attempted to access corrupted data, while the `__x__tval` CSR is either set
+to 0 or holds the virtual address of an instruction fetch, load, or store that
+attempted to access corrupted data.
 
 While the `c` bit indicates that the error may be containable the RAS handler
 may or may not be able to recover the system from such errors. The RAS handler
@@ -489,39 +535,39 @@ the error record such as the address of the memory where corruption was
 detected, etc.
 ====
 
-The address-type (`at`) is a WARL field indicates the type of address reported
-in the `addr_i` register. A error record that does not report addresses may
-hardwire this field to 0. The encodings of the `at` field are listed in
-<<AT_ENCODINGS>>.
+The address-or-info-type (`ait`) is a WARL field that indicates the type of
+information reported in the `addr_info_i` register. An error record that does
+not report information in this field may hardwire this field to 0. The encodings
+of the `ait` field are listed in <<AIT_ENCODINGS>>.
 
 <<<
 
-[[AT_ENCODINGS]]
-.Address type encodings
+[[AIT_ENCODINGS]]
+.Address-or-information type encodings
 [cols="^1,3", options="header"]
 |===
 | *Encoding* | *Description*
-| 0          | None. When `at` is 0, the contents of the `addr_i` register are
-               `UNSPECIFIED`.
+| 0          | None. The contents of the `addr_info_i` register are
+               `UNSPECIFIED` when `ait` is 0.
 | 1          | Supervisor Physical Address (SPA).
-| 2          | Guest Ahysical Address (GPA).
+| 2          | Guest Physical Address (GPA).
 | 3          | Virtual Address (VA).
-| 4-15       | Component specific.
+| 4-15       | Component-specific address or information.
 |===
 
 [NOTE]
 ====
-The component specific address types may be used to report addresses such as a
-local bus address, a Dynamic Random-Access Memory (DRAM) address, etc. The
-interpretation of such addresses is component specific.
+Component-specific information types, as defined in the range 4-15 of the `ait`
+field, may be used to report component-specific addresses or other
+component-specific information in the register. The component-specific addresses
+may include information such as a local bus address or a Dynamic Random-Access
+Memory (DRAM) address. The interpretation of such information is
+component-specific.
 
-A set of component specific encodings are defined to allow a platform to use an
-encoding per type of component specific addresses.
-
-The `addr_i` register must hold the address of type determined by the `at`
-field. Additional non-redundant information about the location accessed using
-the address (e.g., cache set and way, etc.) may be reported in the `info_i`
-register.
+When a standard address type (a VA, SPA, or GPA) is reported in the
+`addr_info_i` register, additional non-redundant information about the location
+accessed using the address (e.g., cache set and way, etc.) may be reported in
+the `info_i` and/or the `suppl_info_i` registers.
 ====
 
 The transaction-type (`tt`) is a WARL field to report the type of transaction
@@ -587,7 +633,8 @@ cannot make this distinction then it may conservatively report this field as 0.
 When the error record is not associated with storage elements (e.g., correcting
 errors detected on bus transactions) this field may be hardwired to 0. If this
 property is unconditionally true for a hardware unit then this field may be
-hardwired to 1.
+hardwired to 1. For error classes other than CE, the interpretation of the `c`
+bit may be specified in a future standard extension.
 
 The error-code (`ec`) is a WARL field holds an error code that provides a
 description of the detected error. Standard `ec` encodings are defined in
@@ -595,6 +642,13 @@ description of the detected error. Standard `ec` encodings are defined in
 to a standard `ec` encoding then such errors may be reported using a custom
 encoding. The custom encodings have the most significant bit set to 1 to
 differentiate them from the standard encodings.
+
+The read-in-progress (`rdip`) field is set to 1 by hardware when a new error is
+recorded in an invalid status register and is cleared to 0 by hardware when a
+valid status register is overwritten. When `control_i.sinv` field is written to
+1, the `v` field is cleared to 0 only if `rdip` field is 1. Gating the clearing
+of the `v` field by the `rdip` field being 1 allows software to detect an
+overwrite that may occur while it is in process of reading an error record.
 
 An error record that supports the 1 setting of the `cece` field in `control_i`,
 implements a corrected-error-counter in the `cec` field. The `cec` is a WARL
@@ -623,27 +677,34 @@ maintained across logged errors).
 
 If software needs to initialize the `cec` and/or `ceco`, then a software write
 to the `status_i` register is appropriate. Before performing the write, software
-should first check for and read any valid error record and then write the register
-with the new `cec` and/or `ceco` value and with `v=0` (Or, if software for some
-reason wants to leave an existing valid error log in place, it should do a
-read-modify-write of the status register).
+should first check for and read any valid error record, invalidate the error
+record, and then write the register with the new `cec` and/or `ceco` value and
+with `v=0`. If `status_i` register write was not accepted due to hardware
+writing a new error into the record and setting the `v` field to 1, then software
+should repeat this process.
 ====
 
 When an UUE or UDE error is logged in an error record, the `cec` and `ceco` fields
 of the error record are not modified and retain their values.
 
-==== Address Register (`addr_i`)
+==== Address or information Register (`addr_info_i`)
 
-The `addr_i` WARL register reports the address associated with the
-detected error when `status_i.at` is not 0. If `status_i.at` is 0, the value in
-this register is `UNSPECIFIED`. An implementation that does not report addresses
-may hardwire this register to 0. Some fields of the register may be hardwired to
-zero if the field is unused to report any type of address. In general, to the
+The `addr_info_i` WARL register reports the address or other information
+associated with the detected error when `status_i.ait` is not 0. If
+`status_i.ait` is 0, the value in this register is `UNSPECIFIED`. An
+implementation that does not report information in this register may hardwire
+this register to 0. Some fields of this register may be hardwired to zero if the
+field is unused to report any type of address or information.
+
+When an address (a VA, GPA, or an SPA) is reported in this register, to the
 extent possible, the error record should capture all significant parts of the
-address. However as a function of the type of error being logged some address
+address. However, as a function of the type of error being logged some address
 fields may be zeroes. Some of the highest address bits may be fixed or may be
 sign-extensions or may be zero-extensions of the next lowest address bit
 depending on the type of address reported.
+
+When component specific information is reported in this register, the
+interpretation of the information is component specific.
 
 ==== Information Register (`info_i`)
 
@@ -738,7 +799,8 @@ The rules for writing the error record are as follows:
             // the highest severity, followed by UDE, and then CE. When a error
             // record is overwritten by a higher severity error, the status bits
             // indicating the severity of the older errors are retained
-            // (i.e., are sticky).
+            // (i.e., are sticky). The rdip flag is cleared to 0.
+            status_i.rdip = 0
             status_i.uue |= new_status.uue
             status_i.ude |= new_status.ude
             status_i.ce |= new_status.ce
@@ -747,8 +809,9 @@ The rules for writing the error record are as follows:
         endif
         if ( severity(new_status) == severity(status_i) )
             // Indicate occurrence of second error of same severity by setting
-            // the multiple-occurrence (MO) field to 1
+            // the multiple-occurrence (MO) field to 1 and rdip is cleared to 0
             status_i.mo = 1
+            status_i.rdip = 0
             // When the two errors have same severity the priority of
             // the errors (as determined by status_i.pri) is used to
             // determine if the error record is overwritten. Higher
@@ -761,7 +824,8 @@ The rules for writing the error record are as follows:
         // There is a no valid error recorded. The new error is recorded.
         // The severity of the new error may be one of UUE, UDE, or CE.
         // The sticky error history is cleared and the multiple occurrence
-        // flag is set to 0.
+        // flag is set to 0. The rdip is set to 1.
+        status_i.rdip = 1
         status_i.uue = new_status.uue
         status_i.ude = new_status.ude & ~new_status.uue
         status_i.ce = new_status.ce & ~new_status.uue & ~new_status.ude
@@ -778,8 +842,8 @@ The rules for writing the error record are as follows:
         status_i.tsv   = new_status.tsv
         status_i.scrub = new_status.scrub
         status_i.ec    = new_status.ec
-        // Update addr_i, info_i, suppl_info_i, timestamp_i with information, if
-        // valid, about the new error
+        // Update addr_info_i, info_i, suppl_info_i, timestamp_i with information,
+        // if valid, about the new error
         status_i.v = 1
     endif
 
