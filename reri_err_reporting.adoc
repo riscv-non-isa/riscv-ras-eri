@@ -322,6 +322,8 @@ fields are specified in <<ERR_SIG_ENABLES>>.
 | 3          | Signal using a platform specific RAS signal.
 |===
 
+<<
+
 The RAS signals are usually used to notify a RAS handler. The physical
 manifestation of the signal is `UNSPECIFIED` by this specification. The
 information carried by the signal is `UNSPECIFIED` by this specification.
@@ -378,6 +380,8 @@ being 1 prevents losing information about an overwrite that might have occurred
 while reading of the error record is in progress. If the `sinv` and `srdp` are
 both written to 1 together then the `rdip` bit is set and the `v` bit is cleared
 to 0.
+
+<<<
 
 [NOTE]
 ====
@@ -612,6 +616,8 @@ explicit transaction. For example, processing a memory transaction may require
 a fabric component to implicitly access a routing table data structure.
 ====
 
+<<<
+
 If the detected error reports additional information in the `info_i` register
 then information-valid (`iv`) field is set to 1. If the detected error reports
 additional supplemental information in the `suppl_info_i` register then
@@ -668,7 +674,12 @@ CE.
 
 Some hardware units may implement low pass filters (e.g., leaky buckets) that
 throttle the rate which CE are reported and counted.
+====
 
+<<<
+
+[NOTE]
+====
 To invalidate a valid error record (presumably after having first read the error
 record), software should write 1 to the `control_i.sinv` control bit to clear
 the `v` bit in the `status_i` register of the error record. Using the `sinv`
