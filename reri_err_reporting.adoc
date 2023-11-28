@@ -5,7 +5,7 @@ support error detection may implement one or more banks of error records. Each
 error bank may implement one or more error records. Each error record
 corresponds to one or more hardware units of the component and reports errors
 detected by those hardware units. A hardware unit may implement multiple error
-records. One or more error records may be valid at any instance of time due to
+records. One or more error records may be valid at any given time due to
 one or more hardware units in the component detecting an error or due to a
 hardware unit having detected one or more errors.
 
@@ -16,7 +16,7 @@ information relevant to the error recorded in that error record.
 
 [NOTE]
 ====
-Implementations may implementing a coarser alignment for the start address of
+Implementations may use a coarser alignment for the start address of
 an error bank. For example, some implementations may locate the error bank
 within a naturally aligned 4-KiB region (a page) of physical address space for
 each error bank, i.e., one page per bank. Coarser alignments may enable register
@@ -25,18 +25,18 @@ decoding to be implemented without a hardware adder circuit.
 
 The behavior for register accesses where the address is not aligned to
 the size of the access, or if the access spans multiple registers, or if the
-size of the access is not 4 bytes or 8 bytes, is `UNSPECIFIED`. An aligned 4
-byte access to a RERI register must be single-copy atomic. Whether an 8 byte
+size of the access is not 4 bytes or 8 bytes, is `UNSPECIFIED`. An aligned
+4-byte access to a RERI register must be single-copy atomic. Whether an 8-byte
 access to an RERI register is single-copy atomic is `UNSPECIFIED`, and such an
-access may appear, internally to the RERI implementation, as if two separate 4
-byte accesses were performed.
+access may appear, internally to the RERI implementation, as if two separate
+4-byte accesses were performed.
 
 [NOTE]
 ====
 The RERI registers are defined in such a way that software can perform two
 individual 4 byte accesses, or hardware can perform two independent 4 byte
 transactions resulting from an 8 byte access, to the high and low halves of the
-register as long as the register semantics, with regards to side-effects, are
+register as long as the register's semantics, with regards to side-effects, are
 respected between the two software accesses, or two hardware transactions,
 respectively.
 ====
@@ -46,19 +46,18 @@ all harts are big-endian-only).
 
 [NOTE]
 ====
-Big-endian-configured harts that make use of an RERI may implement the `REV8`
-byte-reversal instruction defined by the Zbb extension. If `REV8` is not
-implemented, then endianness conversion may be implemented using a sequence
-of instructions.
+Big-endian-configured harts using RERI may implement the `REV8` byte-reversal
+instruction defined by the Zbb extension. If `REV8` is not implemented, then
+endianness conversion may be implemented using a sequence of instructions.
 ====
 
 An implementation-specific response occurs if the error bank and/or record is
 unavailable (e.g., powered down) to memory-mapped accesses. For example, an
 error bank and/or record may respond with all zero data on reads and may
-ignore writes. Other implementations may for example, signal a error response on
-the attempted transaction.
+ignore writes. Other implementations may, for example, signal an error response
+on the attempted transaction.
 
-A error bank that is otherwise available for memory-mapped accesses must respond
+An error bank that is otherwise available for memory-mapped accesses must respond
 with all zero data on reads and must ignore writes to unimplemented registers in
 the page.
 
@@ -105,11 +104,13 @@ produced by the implementation.
 
 A minimal implementation with one error bank, which contains one error record
 only consumes 128 bytes of address space. In terms of storage, the minimal
-implementation can come down to a single bit of storage for the `v` (valid) bit
-in the `status_i` register in the single error record. All other register fields
-of the bank header and error record are WARL and may be hardwired to read-only
-zero or read-only one as appropriate.
+implementation requires only two bits of storage, for the `v` (valid) bit and
+the `rdip` (read-in-progress) bit, in the `status_i` register in the single error
+record. All other register fields of the bank header and error record are WARL and
+may be hardwired to read-only zero or read-only one as appropriate.
 ====
+
+<<<
 
 === Reset Behavior
 
@@ -207,13 +208,13 @@ specific extensions to the error bank and/or the error records.
 
 The `inst_id` field identifies a unique instance of an error bank, within a
 package or at least a silicon die, of the component; ideally unique in the whole
-system. The `inst_id` are defined by the vendor of the system as a unique
+system. The `inst_id` is defined by the vendor of the system as a unique
 identifier for the component. A value of 0 may be returned to indicate the field
 is not implemented.
 
 [NOTE]
 ====
-The `inst_id` are expected to be collected and logged as part of the RAS error
+The `inst_id` is expected to be collected and logged as part of the RAS error
 logs. These may allow the vendor of the silicon to make inferences about the
 instances of the components that may be vulnerable. As these values differ
 between vendors of the system and even among systems provided by the same
@@ -222,10 +223,12 @@ software intimately familiar with that system implementation.
 ====
 
 The `n_err_recs` field indicates the number of error records implemented by the
-error bank. The field is allowed to have a unsigned value between 1 and 63. The
+error bank. The field is allowed to have an unsigned value between 1 and 63. The
 error records of an error bank are located in the memory mapped region reserved
 for the error bank such that the first error record is at offset 64 and the last
 error record at offset (64 + 63 * `n_err_recs`).
+
+<<<
 
 ==== Summary of Valid Error Records (`valid_summary`)
 
@@ -240,8 +243,6 @@ The `valid_summary` is a read-only register and its layout is as follows:
 ], config:{lanes: 4, hspace:1024}}
 ....
 
-<<<
-
 The `sv` bit when 1 indicates that the `valid_bitmap` provides a summary of the
 `valid` bits from the status registers of this error bank. If this bit is 0
 then the error bank does not provide a summary of valid bits and the
@@ -254,6 +255,8 @@ records in the bank are valid. If this bit is 0 then software must read the
 `status_register_i` of each implemented error record in this bank to determine
 if there is a valid error logged in that error record.
 ====
+
+<<<
 
 === Error Record Registers
 
@@ -308,8 +311,6 @@ and UUE respectively when they are logged (i.e. when `else` is 1). Enables for
 unsupported classes of errors may be hardwired to 0. The encodings of these
 fields are specified in <<ERR_SIG_ENABLES>>.
 
-<<<
-
 [[ERR_SIG_ENABLES]]
 .Error signaling enable field encodings
 [cols="^1,3", options="header"]
@@ -320,6 +321,8 @@ fields are specified in <<ERR_SIG_ENABLES>>.
 | 2          | Signal using a High-priority RAS signal.
 | 3          | Signal using a platform specific RAS signal.
 |===
+
+<<
 
 The RAS signals are usually used to notify a RAS handler. The physical
 manifestation of the signal is `UNSPECIFIED` by this specification. The
@@ -424,6 +427,8 @@ are implemented, the implementation should ensure that these capabilities cannot
 be misused to maliciously inject hardware errors that may lead to security
 issues.
 ====
+
+<<<
 
 ==== Status Register (`status_i`)
 
@@ -531,16 +536,13 @@ attempted to access corrupted data.
 While the `c` bit indicates that the error may be containable the RAS handler
 may or may not be able to recover the system from such errors. The RAS handler
 must make the recovery determination based on additional information provided in
-the error record such as the address of the memory where corruption was
-detected, etc.
+the error record such as the address of the memory where corruption was detected.
 ====
 
 The address-or-info-type (`ait`) is a WARL field that indicates the type of
 information reported in the `addr_info_i` register. An error record that does
 not report information in this field may hardwire this field to 0. The encodings
 of the `ait` field are listed in <<AIT_ENCODINGS>>.
-
-<<<
 
 [[AIT_ENCODINGS]]
 .Address-or-information type encodings
@@ -554,6 +556,8 @@ of the `ait` field are listed in <<AIT_ENCODINGS>>.
 | 3          | Virtual Address (VA).
 | 4-15       | Component-specific address or information.
 |===
+
+<<<
 
 [NOTE]
 ====
@@ -611,6 +615,8 @@ explicit transaction. For example, processing a memory transaction may require
 a fabric component to implicitly access a routing table data structure.
 ====
 
+<<<
+
 If the detected error reports additional information in the `info_i` register
 then information-valid (`iv`) field is set to 1. If the detected error reports
 additional supplemental information in the `suppl_info_i` register then
@@ -667,7 +673,12 @@ CE.
 
 Some hardware units may implement low pass filters (e.g., leaky buckets) that
 throttle the rate which CE are reported and counted.
+====
 
+<<<
+
+[NOTE]
+====
 To invalidate a valid error record (presumably after having first read the error
 record), software should write 1 to the `control_i.sinv` control bit to clear
 the `v` bit in the `status_i` register of the error record. Using the `sinv`
@@ -715,25 +726,20 @@ information may hardwire this register to 0.
 
 The format of the register is `UNSPECIFIED` by this specification. This field
 may be interpreted using the error code in `status_i.ec` along with
-implementation specific and implementation defined format and rules.
+implementation defined format and rules.
 
 [NOTE]
 ====
-This field may be used to report error specific information to help locate the
-failing component, guide recovery actions, determine whether the error is
-transient or permanent, etc. The field may be used to report more detailed
-information about the location of the error within the component, for example,
-the set and way where the error was detected, the parity group that was in error,
-the ECC syndrome, a protocol FSM state, the input that caused an assertion to
-fail, etc.
-
-Components that are field replaceable units or detect errors in connected field
-replacement units may log additional information in the `info_i` register to
-help identify the failing component. For example, a memory controller may log
-the memory channel associated with the error such as the Dual In-line Memory
-Module (DIMM) channel, bank, column, row, rank, subRank, device ID, etc.
-
+This register may be used to report information for guiding recovery, error
+nature (transient/permanent), error location (set/way, parity group, ECC
+syndrome), and other details (protocol FSM state, assertion failures).
+Components that are or monitor field replaceable units may log information in
+this register to identify the failing component. For example, a memory
+controller may log the DIMM channel, bank, column, row, rank, subRank, device
+ID, etc.
 ====
+
+<<<
 
 ==== Supplemental Information Register (`suppl_info_i`)
 
@@ -784,7 +790,7 @@ When an error writes or overwrites an error record, the `status_i.cec` and
 severity. When implemented, `cec` counts CE occurrences; unsigned integer
 overflow on `cec` increment sets `ceco` to 1.
 
-The rules for writing the error record are as follows:
+<<<
 
 [[REC_WRITE_RULE]]
 .Error record writing rules
@@ -795,11 +801,8 @@ The rules for writing the error record are as follows:
     if status_i.v == 1
         // There is a valid first error recorded
         if ( severity(new_error) > severity(status_i) )
-            // A higher severity error may overwrite a lower severity error. UUE has
-            // the highest severity, followed by UDE, and then CE. When a error
-            // record is overwritten by a higher severity error, the status bits
-            // indicating the severity of the older errors are retained
-            // (i.e., are sticky). The rdip flag is cleared to 0.
+            // Higher severity errors overwrite less severe errors, retaining
+            // previous error status bits (sticky) but clearing the rdip bit.
             status_i.rdip = 0
             status_i.uue |= new_status.uue
             status_i.ude |= new_status.ude
@@ -808,23 +811,18 @@ The rules for writing the error record are as follows:
             overwrite = TRUE
         endif
         if ( severity(new_status) == severity(status_i) )
-            // Indicate occurrence of second error of same severity by setting
-            // the multiple-occurrence (MO) field to 1 and rdip is cleared to 0
+            // Second errors of the same severity set MO and clear rdip.
             status_i.mo = 1
             status_i.rdip = 0
-            // When the two errors have same severity the priority of
-            // the errors (as determined by status_i.pri) is used to
-            // determine if the error record is overwritten. Higher
-            // priority errors overwrite the lower priority errors.
+            // Second error of same severity overwrites previous error if it
+            // has higher priority (status_i.pri).
             if ( new_status.pri > status_i.pri )
                 overwrite = TRUE;
             endif
         endif
     else
-        // There is a no valid error recorded. The new error is recorded.
-        // The severity of the new error may be one of UUE, UDE, or CE.
-        // The sticky error history is cleared and the multiple occurrence
-        // flag is set to 0. The rdip is set to 1.
+        // No valid error recorded; new error logged, clearing sticky history
+        // and MO bit, and rdip is set.
         status_i.rdip = 1
         status_i.uue = new_status.uue
         status_i.ude = new_status.ude & ~new_status.uue
@@ -842,8 +840,8 @@ The rules for writing the error record are as follows:
         status_i.tsv   = new_status.tsv
         status_i.scrub = new_status.scrub
         status_i.ec    = new_status.ec
-        // Update addr_info_i, info_i, suppl_info_i, timestamp_i with information,
-        // if valid, about the new error
+        // Update addr_info_i, info_i, suppl_info_i, and timestamp_i with new
+        // error information, if valid.
         status_i.v = 1
     endif
 
