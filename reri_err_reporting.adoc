@@ -536,8 +536,7 @@ attempted to access corrupted data.
 While the `c` bit indicates that the error may be containable the RAS handler
 may or may not be able to recover the system from such errors. The RAS handler
 must make the recovery determination based on additional information provided in
-the error record such as the address of the memory where corruption was
-detected, etc.
+the error record such as the address of the memory where corruption was detected.
 ====
 
 The address-or-info-type (`ait`) is a WARL field that indicates the type of
@@ -792,8 +791,6 @@ severity. When implemented, `cec` counts CE occurrences; unsigned integer
 overflow on `cec` increment sets `ceco` to 1.
 
 <<<
-
-The rules for writing the error record are as follows:
 
 [[REC_WRITE_RULE]]
 .Error record writing rules
