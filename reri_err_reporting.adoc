@@ -731,20 +731,13 @@ implementation specific and implementation defined format and rules.
 
 [NOTE]
 ====
-This field may be used to report error specific information to help locate the
-failing component, guide recovery actions, determine whether the error is
-transient or permanent, etc. The field may be used to report more detailed
-information about the location of the error within the component, for example,
-the set and way where the error was detected, the parity group that was in error,
-the ECC syndrome, a protocol FSM state, the input that caused an assertion to
-fail, etc.
-
-Components that are field replaceable units or detect errors in connected field
-replacement units may log additional information in the `info_i` register to
-help identify the failing component. For example, a memory controller may log
-the memory channel associated with the error such as the Dual In-line Memory
-Module (DIMM) channel, bank, column, row, rank, subRank, device ID, etc.
-
+This register may be used to report information for guiding recovery, error
+nature (transient/permanent), error location (set/way, parity group, ECC
+syndrome), and other details (protocol FSM state, assertion failures).
+Components that are or monitor field replaceable units may log information in
+this register to identify the failing component. For example, a memory
+controller may log the Dual In-line Memory Module (DIMM) channel, bank, column,
+row, rank, subRank, device ID, etc.
 ====
 
 ==== Supplemental Information Register (`suppl_info_i`)
@@ -807,11 +800,8 @@ The rules for writing the error record are as follows:
     if status_i.v == 1
         // There is a valid first error recorded
         if ( severity(new_error) > severity(status_i) )
-            // A higher severity error may overwrite a lower severity error. UUE has
-            // the highest severity, followed by UDE, and then CE. When a error
-            // record is overwritten by a higher severity error, the status bits
-            // indicating the severity of the older errors are retained
-            // (i.e., are sticky). The rdip flag is cleared to 0.
+            // Higher severity errors overwrite less severe errors, retaining
+            // previous error status bits (sticky) but clearing the rdip bit.
             status_i.rdip = 0
             status_i.uue |= new_status.uue
             status_i.ude |= new_status.ude
@@ -820,23 +810,18 @@ The rules for writing the error record are as follows:
             overwrite = TRUE
         endif
         if ( severity(new_status) == severity(status_i) )
-            // Indicate occurrence of second error of same severity by setting
-            // the multiple-occurrence (MO) field to 1 and rdip is cleared to 0
+            // Second errors of the same severity set MO and clear rdip.
             status_i.mo = 1
             status_i.rdip = 0
-            // When the two errors have same severity the priority of
-            // the errors (as determined by status_i.pri) is used to
-            // determine if the error record is overwritten. Higher
-            // priority errors overwrite the lower priority errors.
+            // Second error of same severity overwrites previous error if it
+            // has higher priority (status_i.pri).
             if ( new_status.pri > status_i.pri )
                 overwrite = TRUE;
             endif
         endif
     else
-        // There is a no valid error recorded. The new error is recorded.
-        // The severity of the new error may be one of UUE, UDE, or CE.
-        // The sticky error history is cleared and the multiple occurrence
-        // flag is set to 0. The rdip is set to 1.
+        // No valid error recorded; new error logged, clearing sticky history
+        // and MO bit, and rdip is set.
         status_i.rdip = 1
         status_i.uue = new_status.uue
         status_i.ude = new_status.ude & ~new_status.uue
@@ -854,8 +839,8 @@ The rules for writing the error record are as follows:
         status_i.tsv   = new_status.tsv
         status_i.scrub = new_status.scrub
         status_i.ec    = new_status.ec
-        // Update addr_info_i, info_i, suppl_info_i, timestamp_i with information,
-        // if valid, about the new error
+        // Update addr_info_i, info_i, suppl_info_i, and timestamp_i with new
+        // error information, if valid.
         status_i.v = 1
     endif
 
