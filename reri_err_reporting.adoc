@@ -727,7 +727,7 @@ information may hardwire this register to 0.
 
 The format of the register is `UNSPECIFIED` by this specification. This field
 may be interpreted using the error code in `status_i.ec` along with
-implementation specific and implementation defined format and rules.
+implementation defined format and rules.
 
 [NOTE]
 ====
@@ -736,9 +736,11 @@ nature (transient/permanent), error location (set/way, parity group, ECC
 syndrome), and other details (protocol FSM state, assertion failures).
 Components that are or monitor field replaceable units may log information in
 this register to identify the failing component. For example, a memory
-controller may log the Dual In-line Memory Module (DIMM) channel, bank, column,
-row, rank, subRank, device ID, etc.
+controller may log the DIMM channel, bank, column, row, rank, subRank, device
+ID, etc.
 ====
+
+<<<
 
 ==== Supplemental Information Register (`suppl_info_i`)
 
@@ -788,6 +790,8 @@ When an error writes or overwrites an error record, the `status_i.cec` and
 `status_i.ceco` fields update from CEs and retain value for errors of other
 severity. When implemented, `cec` counts CE occurrences; unsigned integer
 overflow on `cec` increment sets `ceco` to 1.
+
+<<<
 
 The rules for writing the error record are as follows:
 
@@ -845,6 +849,8 @@ The rules for writing the error record are as follows:
     endif
 
 ----
+
+<<<
 
 If the `status_i.v`, `status_i.mo`, and `status_i.uue` are all 1 then the RAS
 handler should preferably restart the system to bring it to a correct state as
