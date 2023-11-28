@@ -5,7 +5,7 @@ support error detection may implement one or more banks of error records. Each
 error bank may implement one or more error records. Each error record
 corresponds to one or more hardware units of the component and reports errors
 detected by those hardware units. A hardware unit may implement multiple error
-records. One or more error records may be valid at any instance of time due to
+records. One or more error records may be valid at any given time due to
 one or more hardware units in the component detecting an error or due to a
 hardware unit having detected one or more errors.
 
@@ -16,7 +16,7 @@ information relevant to the error recorded in that error record.
 
 [NOTE]
 ====
-Implementations may implementing a coarser alignment for the start address of
+Implementations may use a coarser alignment for the start address of
 an error bank. For example, some implementations may locate the error bank
 within a naturally aligned 4-KiB region (a page) of physical address space for
 each error bank, i.e., one page per bank. Coarser alignments may enable register
@@ -25,18 +25,18 @@ decoding to be implemented without a hardware adder circuit.
 
 The behavior for register accesses where the address is not aligned to
 the size of the access, or if the access spans multiple registers, or if the
-size of the access is not 4 bytes or 8 bytes, is `UNSPECIFIED`. An aligned 4
-byte access to a RERI register must be single-copy atomic. Whether an 8 byte
+size of the access is not 4 bytes or 8 bytes, is `UNSPECIFIED`. An aligned
+4-byte access to a RERI register must be single-copy atomic. Whether an 8-byte
 access to an RERI register is single-copy atomic is `UNSPECIFIED`, and such an
-access may appear, internally to the RERI implementation, as if two separate 4
-byte accesses were performed.
+access may appear, internally to the RERI implementation, as if two separate
+4-byte accesses were performed.
 
 [NOTE]
 ====
 The RERI registers are defined in such a way that software can perform two
 individual 4 byte accesses, or hardware can perform two independent 4 byte
 transactions resulting from an 8 byte access, to the high and low halves of the
-register as long as the register semantics, with regards to side-effects, are
+register as long as the register's semantics, with regards to side-effects, are
 respected between the two software accesses, or two hardware transactions,
 respectively.
 ====
@@ -46,19 +46,18 @@ all harts are big-endian-only).
 
 [NOTE]
 ====
-Big-endian-configured harts that make use of an RERI may implement the `REV8`
-byte-reversal instruction defined by the Zbb extension. If `REV8` is not
-implemented, then endianness conversion may be implemented using a sequence
-of instructions.
+Big-endian-configured harts using RERI may implement the `REV8` byte-reversal
+instruction defined by the Zbb extension. If `REV8` is not implemented, then
+endianness conversion may be implemented using a sequence of instructions.
 ====
 
 An implementation-specific response occurs if the error bank and/or record is
 unavailable (e.g., powered down) to memory-mapped accesses. For example, an
 error bank and/or record may respond with all zero data on reads and may
-ignore writes. Other implementations may for example, signal a error response on
-the attempted transaction.
+ignore writes. Other implementations may, for example, signal an error response
+on the attempted transaction.
 
-A error bank that is otherwise available for memory-mapped accesses must respond
+An error bank that is otherwise available for memory-mapped accesses must respond
 with all zero data on reads and must ignore writes to unimplemented registers in
 the page.
 
@@ -105,11 +104,13 @@ produced by the implementation.
 
 A minimal implementation with one error bank, which contains one error record
 only consumes 128 bytes of address space. In terms of storage, the minimal
-implementation can come down to a single bit of storage for the `v` (valid) bit
-in the `status_i` register in the single error record. All other register fields
-of the bank header and error record are WARL and may be hardwired to read-only
-zero or read-only one as appropriate.
+implementation requires only two bits of storage, for the `v` (valid) bit and
+the `rdip` (read-in-progress) bit, in the `status_i` register in the single error
+record. All other register fields of the bank header and error record are WARL and
+may be hardwired to read-only zero or read-only one as appropriate.
 ====
+
+<<<
 
 === Reset Behavior
 
@@ -207,13 +208,13 @@ specific extensions to the error bank and/or the error records.
 
 The `inst_id` field identifies a unique instance of an error bank, within a
 package or at least a silicon die, of the component; ideally unique in the whole
-system. The `inst_id` are defined by the vendor of the system as a unique
+system. The `inst_id` is defined by the vendor of the system as a unique
 identifier for the component. A value of 0 may be returned to indicate the field
 is not implemented.
 
 [NOTE]
 ====
-The `inst_id` are expected to be collected and logged as part of the RAS error
+The `inst_id` is expected to be collected and logged as part of the RAS error
 logs. These may allow the vendor of the silicon to make inferences about the
 instances of the components that may be vulnerable. As these values differ
 between vendors of the system and even among systems provided by the same
@@ -222,7 +223,7 @@ software intimately familiar with that system implementation.
 ====
 
 The `n_err_recs` field indicates the number of error records implemented by the
-error bank. The field is allowed to have a unsigned value between 1 and 63. The
+error bank. The field is allowed to have an unsigned value between 1 and 63. The
 error records of an error bank are located in the memory mapped region reserved
 for the error bank such that the first error record is at offset 64 and the last
 error record at offset (64 + 63 * `n_err_recs`).
@@ -240,8 +241,6 @@ The `valid_summary` is a read-only register and its layout is as follows:
 ], config:{lanes: 4, hspace:1024}}
 ....
 
-<<<
-
 The `sv` bit when 1 indicates that the `valid_bitmap` provides a summary of the
 `valid` bits from the status registers of this error bank. If this bit is 0
 then the error bank does not provide a summary of valid bits and the
@@ -254,6 +253,8 @@ records in the bank are valid. If this bit is 0 then software must read the
 `status_register_i` of each implemented error record in this bank to determine
 if there is a valid error logged in that error record.
 ====
+
+<<<
 
 === Error Record Registers
 
@@ -377,8 +378,6 @@ being 1 prevents losing information about an overwrite that might have occurred
 while reading of the error record is in progress. If the `sinv` and `srdp` are
 both written to 1 together then the `rdip` bit is set and the `v` bit is cleared
 to 0.
-
-<<<
 
 [NOTE]
 ====
@@ -539,8 +538,6 @@ The address-or-info-type (`ait`) is a WARL field that indicates the type of
 information reported in the `addr_info_i` register. An error record that does
 not report information in this field may hardwire this field to 0. The encodings
 of the `ait` field are listed in <<AIT_ENCODINGS>>.
-
-<<<
 
 [[AIT_ENCODINGS]]
 .Address-or-information type encodings
@@ -848,8 +845,6 @@ The rules for writing the error record are as follows:
     endif
 
 ----
-
-<<<
 
 If the `status_i.v`, `status_i.mo`, and `status_i.uue` are all 1 then the RAS
 handler should preferably restart the system to bring it to a correct state as
