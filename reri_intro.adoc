@@ -222,6 +222,8 @@ count the corrections performed. Such components may additionally include a
 fixed or programmable threshold to notify a RAS handler when the number of
 corrected errors surpasses the threshold.
 
+<<<
+
 === RERI Features
 
 Version 1.0 of the RISC-V RERI specification supports the following features:
