@@ -140,7 +140,7 @@ All registers in an error bank must have the same reset behavior.
 The `vendor_n_imp_id` register is a read-only register and its layout is:
 
 .Vendor and implementation ID
-[wavedrom, , ]
+[wavedrom, ,svg]
 ....
 {reg: [
   {bits: 32, name: 'vendor_id'},
@@ -174,7 +174,7 @@ specification.
 The `bank_info` is a read-only register and its layout is as follows:
 
 .Error bank information
-[wavedrom, , ]
+[wavedrom, ,svg]
 ....
 {reg: [
   {bits: 16, name: 'inst_id'},
@@ -235,7 +235,7 @@ error record at offset (64 + 63 * `n_err_recs`).
 The `valid_summary` is a read-only register and its layout is as follows:
 
 .Summary of valid error records
-[wavedrom, , ]
+[wavedrom, ,svg]
 ....
 {reg: [
   {bits: 1,  name: 'sv'},
@@ -267,7 +267,7 @@ the corresponding error record in the error bank. The layout of this register
 is as follows:
 
 .Control register
-[wavedrom, , ]
+[wavedrom, ,svg]
 ....
 {reg: [
   {bits: 1,  name: 'else'},
@@ -436,7 +436,7 @@ The `status_i` is a read-write WARL register that reports errors detected by
 the hardware unit.
 
 .Status register
-[wavedrom, , ]
+[wavedrom, ,svg]
 ....
 {reg: [
   {bits: 1,  name: 'v'},
