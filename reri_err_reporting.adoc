@@ -593,13 +593,13 @@ to 0.
 | 7          | Implicit write.
 |===
 
-For a RISC-V hart, the Privileged specification cite:[PRIV] defines memory
+For a RISC-V hart, the Unprivileged specification cite:[UPRIV] defines memory
 accesses by instructions as either explicit or implicit. An Implicit read or
 write is an access that may be implicitly performed by hardware to perform an
 explicit operation. For example, a load or store instruction executed by the
 hart may perform implicit memory accesses to page table data structures.
 Instruction memory accesses by a hart are termed as implicit accesses by the
-Privileged specification. However, for the purposes of error reporting, only
+Unprivileged specification. However, for the purposes of error reporting, only
 the implicit accesses to data structures, such as the (guest) page tables that
 are used to determine the address of the instructions to be fetched, are termed
 as implicit accesses. The read to fetch the instruction bytes themselves is
