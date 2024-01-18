@@ -322,7 +322,7 @@ fields are specified in <<ERR_SIG_ENABLES>>.
 | 3          | Signal using a platform specific RAS signal.
 |===
 
-<<
+<<<
 
 The RAS signals are usually used to notify a RAS handler. The physical
 manifestation of the signal is `UNSPECIFIED` by this specification. The
@@ -546,7 +546,7 @@ of the `ait` field are listed in <<AIT_ENCODINGS>>.
 
 [[AIT_ENCODINGS]]
 .Address-or-information type encodings
-[cols="^1,3", options="header"]
+[cols="^1,4", options="header"]
 |===
 | *Encoding* | *Description*
 | 0          | None. The contents of the `addr_info_i` register are
