@@ -273,8 +273,8 @@ is as follows:
   {bits: 1,  name: 'else'},
   {bits: 1,  name: 'cece'},
   {bits: 2,  name: 'ces'},
-  {bits: 2,  name: 'udes'},
-  {bits: 2,  name: 'uues'},
+  {bits: 2,  name: 'ueds'},
+  {bits: 2,  name: 'uecs'},
   {bits: 24, name: 'WPRI'},
   {bits: 16, name: 'eid'},
   {bits: 1,  name: 'sinv'},
@@ -306,8 +306,8 @@ continue to use containment techniques like data poisoning even when error
 reporting is disabled.
 ====
 
-The `ces`, `udes`, and `uues` are WARL fields used to enable signaling of CE, UDE,
-and UUE respectively when they are logged (i.e. when `else` is 1). Enables for
+The `ces`, `ueds`, and `uecs` are WARL fields used to enable signaling of CE, UEC,
+and UEC respectively when they are logged (i.e. when `else` is 1). Enables for
 unsupported classes of errors may be hardwired to 0. The encodings of these
 fields are specified in <<ERR_SIG_ENABLES>>.
 
@@ -405,7 +405,7 @@ of 0. Writing a value of 0 disables the counter. If error injection is not
 supported by the error record then the `eid` field may be hardwired to 0. When
 `eid` reaches a count of 0, the status register is made valid by setting the
 `status_i.v` bit to 1. The `status_i.v` transition from 0 to 1 generates a RAS
-signal corresponding to the class of error (CE, UDE, or UUE) setup in the
+signal corresponding to the class of error (CE, UED, or UEC) setup in the
 `status_i` register. The counter continues to count even if the `status_i`
 register was overwritten by a hardware detected error before the `eid` counts
 down to 0.
@@ -441,8 +441,8 @@ the hardware unit.
 {reg: [
   {bits: 1,  name: 'v'},
   {bits: 1,  name: 'ce'},
-  {bits: 1,  name: 'ude'},
-  {bits: 1,  name: 'uue'},
+  {bits: 1,  name: 'ued'},
+  {bits: 1,  name: 'uec'},
   {bits: 2,  name: 'pri'},
   {bits: 1,  name: 'mo'},
   {bits: 1,  name: 'c'},
@@ -466,15 +466,15 @@ The error record holds a valid error log if the `v` field is 1. The `status_i`
 register does not accept a software write when the `v` field is 1.
 
 If the detected error was corrected then `ce` is set to 1. If the detected error
-could not be corrected but was deferred then `ude` is set to 1. If the detected
-error could not be corrected or deferred and thus needs urgent handling by an
-RAS handler, then the `uue` bit is set to 1. If the error record does not log a
-class of errors (e.g., does not support UDE), then the corresponding bit may be
+could not be corrected but was deferred then `ued` is set to 1. If the detected
+error could not be corrected or deferred and thus needs immediate handling by an
+RAS handler, then the `uec` bit is set to 1. If the error record does not log a
+class of errors (e.g., does not support UED), then the corresponding bit may be
 hardwired to 0. If the bits corresponding to more than one error class are set
 to 1 then the error record holds information about the highest severity error
 class among the bits set. The error record may be used to provide an
-informational update by setting the `v` bit to 1 and setting `ce`, `ude`, and
-`uue` bits to 0. Such informational updates are signaled using the signal
+informational update by setting the `v` bit to 1 and setting `ce`, `ued`, and
+`uec` bits to 0. Such informational updates are signaled using the signal
 configured in `control_i.ces`.
 
 When `v` is 1, if more errors of the same class as the error currently logged in
@@ -482,7 +482,7 @@ the error record occur then the multiple-occurrence (`mo`) bit is set to indicat
 the multiple occurrence of errors of the same severity. See <<OVERWRITE_RULES>>
 for rules on overwriting the error record in such cases.
 
-Each error of an error class (CE, UDE, or UUE) that may be logged in an error
+Each error of an error class (CE, UED, or UEC) that may be logged in an error
 record may be associated with a priority which is a number between 0 and 3;
 priority value of 3 being the highest priority and priority value of 0 being the
 lowest priority. The priority values indicate relative priority among errors of
@@ -505,17 +505,17 @@ implementation may support only a subset of legal values for this field and
 an implementation that does not support reporting of a priority per error may
 hardwire this field to 0.
 
-The error record overwrite rules use the error class (CE, UDE, or UUE) and the
+The error record overwrite rules use the error class (CE, UED, or UEC) and the
 error priority (`pri`) as specified in <<OVERWRITE_RULES>>.
 
-When an UUE occurs the containable (`c`) bit may be set to 1 to indicate
+When an UEC occurs the containable (`c`) bit may be set to 1 to indicate
 that the error has not propagated beyond the boundaries of the hardware unit
 that detected the error and thus may be *containable* through recovery actions
 (e.g., terminating the computation, etc.) carried out by the RAS handler.
-The `c` bit is WARL. For error classes other than UUE, the interpretation of
+The `c` bit is WARL. For error classes other than UEC, the interpretation of
 the `c` bit may be specified in a future standard extension.
 
-For a RISC-V hart, some UUE may cause a Hardware Error exception cite:[PRIV].
+For a RISC-V hart, some UEC may cause a Hardware Error exception cite:[PRIV].
 A Hardware Error is a synchronous exception, triggered when corrupted or
 uncorrectable data is accessed, either explicitly or implicitly, by an
 instruction. In this context, "data" encompasses all types of information used
@@ -593,22 +593,23 @@ to 0.
 | 7          | Implicit write.
 |===
 
+For a RISC-V hart, the Privileged specification cite:[PRIV] defines memory
+accesses by instructions as either explicit or implicit. An Implicit read or
+write is an access that may be implicitly performed by hardware to perform an
+explicit operation. For example, a load or store instruction executed by the
+hart may perform implicit memory accesses to page table data structures.
+Instruction memory accesses by a hart are termed as implicit accesses by the
+Privileged specification. However, for the purposes of error reporting, only
+the implicit accesses to data structures, such as the (guest) page tables that
+are used to determine the address of the instructions to be fetched, are termed
+as implicit accesses. The read to fetch the instruction bytes themselves is
+classified as an explicit read.
+
 [NOTE]
 ====
 Implementations may report additional information about the transaction (e.g.,
 whether speculative, on-demand vs. prefetch, etc.) in the `info_i` and/or
 `suppl_info_i` registers.
-
-For a RISC-V hart, the Privileged specification cite:[PRIV] defines memory
-accesses by instructions as either explicit or implicit. Implicit read and write
-are accesses that may be implicitly performed by hardware to perform an explicit
-operation. For example, a load or store instruction executed by the hart may
-perform implicit memory accesses to page table data structures. Instruction
-memory accesses by a hart are termed as implicit accesses by the Privileged
-specification. However for the purposes of error reporting only the implicit
-accesses to data structures like the (guest) page tables used to determine the
-address of the instruction to fetch are termed as implicit accesses. The
-read to fetch the instruction bytes themselves are termed as explicit reads.
 
 A non-hart component may also perform implicit accesses in order to process an
 explicit transaction. For example, processing a memory transaction may require
@@ -695,7 +696,7 @@ writing a new error into the record and setting the `v` field to 1, then softwar
 should repeat this process.
 ====
 
-When an UUE or UDE error is logged in an error record, the `cec` and `ceco` fields
+When an UEC or UED error is logged in an error record, the `cec` and `ceco` fields
 of the error record are not modified and retain their values.
 
 ==== Address or information Register (`addr_info_i`)
@@ -777,12 +778,12 @@ When a hardware unit detects an error it may find its error record still valid
 due to an earlier detected error that has not yet been consumed by software.
 
 The overwrite rules allow a higher severity error to overwrite a lower severity
-error. UUE has the highest severity, followed by UDE, and then CE. When the two
+error. UEC has the highest severity, followed by UED, and then CE. When the two
 errors have same severity the priority of the errors (as determined by
 `status_i.pri`) is used to determine if the error record is overwritten. Higher
 priority errors overwrite the lower priority errors. When a error record is
-overwritten by a higher severity error (UDE/CE by UUE, UDE by UUE, or CE by
-UUE/UDE), the status bits indicating the severity of the older errors are
+overwritten by a higher severity error (UED/CE by UEC, UED by UEC, or CE by
+UEC/UED), the status bits indicating the severity of the older errors are
 retained (i.e., are sticky).
 
 When an error writes or overwrites an error record, the `status_i.cec` and
@@ -801,32 +802,31 @@ overflow on `cec` increment sets `ceco` to 1.
     if status_i.v == 1
         // There is a valid first error recorded
         if ( severity(new_error) > severity(status_i) )
-            // Higher severity errors overwrite less severe errors, retaining
-            // previous error status bits (sticky) but clearing the rdip bit.
-            status_i.rdip = 0
-            status_i.uue |= new_status.uue
-            status_i.ude |= new_status.ude
-            status_i.ce |= new_status.ce
+            // Higher severity errors overwrite less severe errors and clear mo
             status_i.mo = 0
             overwrite = TRUE
         endif
         if ( severity(new_status) == severity(status_i) )
-            // Second errors of the same severity set MO and clear rdip.
+            // Second errors of the same severity set MO
             status_i.mo = 1
-            status_i.rdip = 0
             // Second error of same severity overwrites previous error if it
             // has higher priority (status_i.pri).
             if ( new_status.pri > status_i.pri )
                 overwrite = TRUE;
             endif
         endif
+        // previous error status bits are retained (sticky) but rdip bit is cleared.
+        status_i.rdip = 0
+        status_i.uec |= new_status.uec
+        status_i.ued |= new_status.ued
+        status_i.ce  |= new_status.ce
     else
         // No valid error recorded; new error logged, clearing sticky history
         // and MO bit, and rdip is set.
         status_i.rdip = 1
-        status_i.uue = new_status.uue
-        status_i.ude = new_status.ude & ~new_status.uue
-        status_i.ce = new_status.ce & ~new_status.uue & ~new_status.ude
+        status_i.uec = new_status.uec
+        status_i.ued = new_status.ued & ~new_status.uec
+        status_i.ce = new_status.ce & ~new_status.uec & ~new_status.ued
         status_i.mo = 0
         overwrite = TRUE;
     endif
@@ -849,10 +849,10 @@ overflow on `cec` increment sets `ceco` to 1.
 
 <<<
 
-If the `status_i.v`, `status_i.mo`, and `status_i.uue` are all 1 then the RAS
+If the `status_i.v`, `status_i.mo`, and `status_i.uec` are all 1 then the RAS
 handler should preferably restart the system to bring it to a correct state as
-an UUE record has been lost. If the `status_i.v` and `status_i.mo` are 1 but
-`status_i.uue` is 0 (i.e., the logged error is a UDE or a CE) then the RAS
+an UEC record has been lost. If the `status_i.v` and `status_i.mo` are 1 but
+`status_i.uec` is 0 (i.e., the logged error is a UED or a CE) then the RAS
 handler may keep the system operational.
 
 If multiple errors occur simultaneously then they may be recorded individually

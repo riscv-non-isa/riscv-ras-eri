@@ -139,15 +139,15 @@ corrected by the hardware are called *Corrected Errors (CE)*.
 Errors that could not be corrected are called uncorrected errors. A component
 that detects an uncorrected error may allow possibly corrupted data to
 propagate to the requester of the data but associate an indicator (e.g., poison)
-with the data. Such errors are said to be *Uncorrected Deferred Errors (UDE)* as
+with the data. Such errors are said to be *Uncorrected Errors Deferred (UED)* as
 they allow the component to continue operation and defer dealing with the error
 to a later point in time if the data corrupted by the error is consumed. Deferring
 errors allows deferring the error handling to an ultimate consumer of the
 corrupted data that may be able to provide more precise information to a RAS
 handler about the contexts affected by the corruption and thus enable more
 precise error recover actions by the RAS handler. The component that detected
-and deferred the error may notify a RAS handler by reporting the UDE
-but such a UDE does not need an immediate remedial action to be performed by the
+and deferred the error may notify a RAS handler by reporting the UED
+but such a UED does not need an immediate remedial action to be performed by the
 RAS handler.  For example, a memory controller may detect an uncorrectable ECC
 error on data in memory but since there is no immediate consumer of the data the
 memory controller may just mark the data as poisoned and defer the error
@@ -158,17 +158,17 @@ data is only partially written then the data continues to be marked as poisoned.
 
 A component that detects an uncorrected error may be unable to defer the
 handling of the error by techniques such as poisoning. Such errors are said to
-be *Uncorrected Urgent Errors (UUE)* and a RAS handler is invoked as
+be *Uncorrected Errors Critical (UEC)* and a RAS handler is invoked as
 immediate remedial actions are required. For example, a cache controller
 may detect an uncorrectable ECC error on the memory used to hold cache tags
 and since such errors cannot be attributed to any particular data element
-these errors may be classified as UUE. If poisoned data is attempted to be
-consumed by a component (e.g. a hart, an IOMMU, a device, etc.) then an UUE
+these errors may be classified as UEC. If poisoned data is attempted to be
+consumed by a component (e.g. a hart, an IOMMU, a device, etc.) then an UEC
 occurs as immediate remedial actions are required and further deferral of the
 error is not possible.
 
 A component that signals a request for execution of an RAS handler
-for an UUE may indicate that the error has not propagated beyond the boundaries
+for an UEC may indicate that the error has not propagated beyond the boundaries
 of the component that detected the error and thus may be *containable* through
 recovery actions (e.g., terminating the computation, etc.) carried out by the
 RAS handler.
@@ -180,7 +180,7 @@ endpoint. In such cases the component may receive the data with a deferred
 error. Such a component may propagate the error and not log an error by itself.
 However, if the component to which the data is being propagated (e.g. a PCIe
 endpoint) is not capable of handling poison then the former component  must
-signal a UUE instead of propagating the corrupted data, as the act of
+signal a UEC instead of propagating the corrupted data, as the act of
 propagation breaks containment of the error.
 
 An error detected by a component may lead to a failure mode where the component
@@ -331,8 +331,8 @@ between hardware components and error errors/banks.
 | SPA              | Supervisor Physical Address. See Priv. specification.
 | TLB              | Translation Lookaside Buffer.
 | VA               | Virtual Address. See Priv. specification.
-| UDE              | Uncorrected Deferred Error.
-| UUE              | Uncorrected Urgent Error.
+| UED              | Uncorrected Error Deferred.
+| UEC              | Uncorrected Error Critical.
 | WARL             | Write Any values, Reads Legal values: Attribute of a
                      register field that is only defined for a subset of bit
                      encodings, but allow any value to be written while
