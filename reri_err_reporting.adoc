@@ -306,7 +306,7 @@ continue to use containment techniques like data poisoning even when error
 reporting is disabled.
 ====
 
-The `ces`, `ueds`, and `uecs` are WARL fields used to enable signaling of CE, UEC,
+The `ces`, `ueds`, and `uecs` are WARL fields used to enable signaling of CE, UED,
 and UEC respectively when they are logged (i.e. when `else` is 1). Enables for
 unsupported classes of errors may be hardwired to 0. The encodings of these
 fields are specified in <<ERR_SIG_ENABLES>>.
