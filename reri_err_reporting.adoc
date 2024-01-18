@@ -285,10 +285,10 @@ is as follows:
 ....
 
 Error reporting functionality in the error record is enabled if the
-`else` field is set to 1. The `else` field is WARL and may default to 1 or 0 at
-reset. When `else` is 1, the hardware unit logs and signals errors in the error
-record. When `else` is 0, whether the hardware unit continues detecting and
-correcting errors is `UNSPECIFIED`.
+error-logging-and-signaling-enable (`else`) field is set to 1. The `else` field
+is WARL and may default to 1 or 0 at reset. When `else` is 1, the hardware unit
+logs and signals errors in the error record. When `else` is 0, whether the
+hardware unit continues detecting and correcting errors is `UNSPECIFIED`.
 
 [NOTE]
 ====
@@ -462,8 +462,8 @@ the hardware unit.
 ], config:{lanes: 4, hspace:1024}}
 ....
 
-The error record holds a valid error log if the `v` field is 1. The `status_i`
-register does not accept a software write when the `v` field is 1.
+The error record holds a valid error log if the valid (`v`) field is 1. The
+`status_i` register does not accept a software write when the `v` field is 1.
 
 If the detected error was corrected then `ce` is set to 1. If the detected error
 could not be corrected but was deferred then `ued` is set to 1. If the detected
@@ -499,8 +499,8 @@ priority is also used to determine if a new error may overwrite a previously
 reported error of the same error class in the error record.
 ====
 
-The `pri` field in the error record indicates the priority of the currently
-logged error in the error record. The `pri` is a WARL field and an
+The priority (`pri`) field in the error record indicates the priority of the
+currently logged error in the error record. The `pri` is a WARL field and an
 implementation may support only a subset of legal values for this field and
 an implementation that does not support reporting of a priority per error may
 hardwire this field to 0.
@@ -699,7 +699,7 @@ should repeat this process.
 When an UEC or UED error is logged in an error record, the `cec` and `ceco` fields
 of the error record are not modified and retain their values.
 
-==== Address or information Register (`addr_info_i`)
+==== Address-or-Information Register (`addr_info_i`)
 
 The `addr_info_i` WARL register reports the address or other information
 associated with the detected error when `status_i.ait` is not 0. If
