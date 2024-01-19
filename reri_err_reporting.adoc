@@ -834,7 +834,7 @@ overflow on `cec` increment sets `ceco` to 1.
         status_i.pri   = new_status.pri
         status_i.c     = new_status.c
         status_i.tt    = new_status.tt
-        status_i.at    = new_status.at
+        status_i.ait   = new_status.ait
         status_i.iv    = new_status.iv
         status_i.siv   = new_status.siv
         status_i.tsv   = new_status.tsv
