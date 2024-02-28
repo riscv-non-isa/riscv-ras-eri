@@ -3,7 +3,7 @@
 == Introduction
 
 The RAS Error Record Register Interface (RERI) specification augments
-Reliability, Availability, and Servciceability (RAS) features in the SoC with a
+Reliability, Availability, and Serviceability (RAS) features in the SoC with a
 standard mechanism for reporting errors by means of a memory-mapped register
 interface to enable error reporting, provide the facility to log the detected
 errors (including their severity, nature, and location), and configuring means
