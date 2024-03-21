@@ -144,9 +144,8 @@ The `vendor_n_imp_id` register is a read-only register and its layout is:
 ....
 {reg: [
   {bits: 32, name: 'vendor_id'},
-  {bits: 16, name: 'imp_id'},
-  {bits: 16, name: 'WPRI'},
-], config:{lanes: 2, hspace:1024}}
+  {bits: 32, name: 'imp_id'},
+], config:{lanes: 1, hspace:1024}}
 ....
 
 The `vendor_id` field follows the encoding as defined by `mvendorid` CSR and
