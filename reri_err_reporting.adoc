@@ -287,8 +287,10 @@ is as follows:
 Error reporting functionality in the error record is enabled if the
 error-logging-and-signaling-enable (`else`) field is set to 1. The `else` field
 is WARL and may default to 1 or 0 at reset. When `else` is 1, the hardware unit
-logs and signals errors in the error record. When `else` is 0, whether the
-hardware unit continues detecting and correcting errors is `UNSPECIFIED`.
+logs and signals errors in the error record. When `else` is 0, any signaling
+associated with prior logged errors remains unaffected, the hardware unit does
+not log and signal new errors in the error record, and it is `UNSPECIFIED`
+whether the hardware unit continues detecting and correcting errors.
 
 [NOTE]
 ====
