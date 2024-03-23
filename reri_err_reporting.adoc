@@ -474,7 +474,7 @@ hardwired to 0. If the bits corresponding to more than one error class are set
 to 1 then the error record holds information about the highest severity error
 class among the bits set. The error record may be used to provide an
 informational update by setting the `v` bit to 1 and setting `ce`, `ued`, and
-`uec` bits to 0. Such informational updates are signaled using the signal
+`uec` bits to 0. Such informational updates are lower severity than a CE but are signaled using the signal
 configured in `control_i.ces`.
 
 When `v` is 1, if more errors of the same class as the error currently logged in
@@ -778,10 +778,10 @@ When a hardware unit detects an error it may find its error record still valid
 due to an earlier detected error that has not yet been consumed by software.
 
 The overwrite rules allow a higher severity error to overwrite a lower severity
-error. UEC has the highest severity, followed by UED, and then CE. When the two
+error. UEC has the highest severity, followed by UED, then CE, and finally, informational. When the two
 errors have the same severity the priority of the errors (as determined by
 `status_i.pri`) is used to determine if the error record is overwritten. Higher
-priority errors overwrite the lower priority errors. When a error record is
+priority errors overwrite the lower priority errors. When an error record is
 overwritten by a higher severity error (UED/CE by UEC, UED by UEC, or CE by
 UEC/UED), the status bits indicating the severity of the older errors are
 retained (i.e., are sticky).
