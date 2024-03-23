@@ -367,7 +367,7 @@ the `rdip` (read-in-progress) bit of the associated `status_i` register to be
 set. The `srdp` field always returns 0 on read. The `rdip` field in the
 `status_i` register is set to 1 by hardware when an error is recorded in an
 invalid error record causing the `v` field to change from 0 to 1. The `rdip`
-field is cleared to 0 by hardware when a new error overwrites a valid (`v=1`)
+field is cleared to 0 by hardware when a new error updates any field of a valid (`v=1`)
 error record.
 
 The status-register-invalidate (`sinv`) bit, when written with a value of 1,
