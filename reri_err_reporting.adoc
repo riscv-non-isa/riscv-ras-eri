@@ -377,7 +377,7 @@ its value. If corrected error counting is not supported in the error record then
 `cece` and `cec` may be hardwired to 0. An overflow of `cec` is signaled using
 the signal configured in the `ces` field. When `cece` is 1, the logging of a CE
 in the error record does not cause an error signal and an error signal
-configured in `ces` occurs only on a `cec` overflow.
+configured in `ces` occurs only on a `cec` overflow that sets the `ceco` bit.
 
 The set-read-in-progress (`srdp`) field, when written with a value of 1, causes
 the `rdip` (read-in-progress) bit of the associated `status_i` register to be
@@ -676,8 +676,7 @@ overwrite that may occur while it is in process of reading an error record.
 
 An error record that supports the 1 setting of the `cece` field in `control_i`,
 implements a corrected-error-counter in the `cec` field. The `cec` is a WARL
-field. When `cece` is 1, the `cec` is incremented on each CE in addition to
-logging details of the error in the error record registers. If an unsigned
+field. When `cece` is 1, the `cec` is incremented on each CE. If an unsigned
 integer overflow occurs on an `cec` increment then the
 corrected-error-counter-overflow (`ceco`) field is set to 1. The `cec`
 continues to count following an overflow. The `cec` and `ceco` fields hold valid
