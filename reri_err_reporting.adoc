@@ -790,8 +790,11 @@ global counter (e.g, mtime, etc.), or other implementation specific means.
 [[OVERWRITE_RULES]]
 === Error Record Overwrite Rules
 
-When a hardware unit detects an error it may find its error record still valid
-due to an earlier detected error that has not yet been consumed by software.
+When a hardware unit detects an error and its error record is not valid, it
+writes the error record with the error information and marks the record as
+valid. However, if the error record is already valid, owing to an earlier
+detected but unprocessed error, the decision to overwrite the error record with
+new error information is determined by the new error's severity and/or priority.
 
 The overwrite rules allow a higher severity error to overwrite a lower severity
 error. UEC has the highest severity, followed by UED, then CE, and finally, informational. When the two
@@ -806,6 +809,11 @@ When an error writes or overwrites an error record, the `status_i.cec` and
 `status_i.ceco` fields update from CEs and retain value for errors of other
 severity. When implemented, `cec` counts CE occurrences; unsigned integer
 overflow on `cec` increment sets `ceco` to 1.
+
+Whenever a new error writes to or overwrites an error record, the signal
+configured in the `control_i` register for its severity level is asserted. When
+`status_i.ceco` changes from 0 to 1, the signal configured in `control_i.ces` is
+asserted.
 
 <<<
 
@@ -886,10 +894,6 @@ highest severity error or when they have the same severity the highest priority
 error. And yet another implementation may choose to record one of the errors as
 determined by implementation specific rules.
 ====
-
-When a new error is recorded by the hardware unit in the `status_i` register of its
-error record then the signal configured in the `control_i` register for error is
-asserted.
 
 === Error Reporting Defined by Other Standards
 
