@@ -9,11 +9,11 @@ interface to enable error reporting, provide the facility to log the detected
 errors (including their severity, nature, and location), and configuring means
 to signal the error to a RAS handler component. The RAS handler may use this
 information to determine suitable recovery actions that may include terminating
-the computation (e.g., terminating a process, etc.), restarting parts or all of
+the computation (e.g., terminating a process), restarting parts or all of
 the system, etc. to recover from the errors. Additionally, this specification
 shall support software-initiated error logging, reporting, and testing of RAS
 handlers. Lastly, this specification shall provide maximal flexibility to
-implement error handling and shall co-exist with RAS frameworks defined by other
+implement error handling and coexists with RAS frameworks defined by other
 standards such as PCIe cite:[PCI] and CXL cite:[CXL].
 
 A system is an entity that interacts with other entities such as other systems,
