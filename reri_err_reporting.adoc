@@ -519,6 +519,8 @@ implementation may support only a subset of legal values for this field and
 an implementation that does not support reporting of a priority per error may
 hardwire this field to 0.
 
+<<<
+
 The error record overwrite rules use the error class (CE, UED, or UEC) and the
 error priority (`pri`) as specified in <<OVERWRITE_RULES>>.
 
