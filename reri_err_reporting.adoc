@@ -225,7 +225,7 @@ The `n_err_recs` field indicates the number of error records implemented by the
 error bank. The field is allowed to have an unsigned value between 1 and 63. The
 error records of an error bank are located in the memory mapped region reserved
 for the error bank such that the first error record is at offset 64 and the last
-error record at offset (64 + 63 * `n_err_recs`).
+error record at offset (64 * `n_err_recs`).
 
 <<<
 
