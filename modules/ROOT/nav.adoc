@@ -1,0 +1,4 @@
+.RAS Error Record Register Interface
+* xref:reri_contributors.adoc[Contributors]
+* xref:reri_intro.adoc[Changelog]
+* xref:reri_err_reporting.adoc[Terms and Abbreviations]
