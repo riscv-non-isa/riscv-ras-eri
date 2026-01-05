@@ -225,7 +225,7 @@ The `n_err_recs` field indicates the number of error records implemented by the
 error bank. The field is allowed to have an unsigned value between 1 and 63. The
 error records of an error bank are located in the memory mapped region reserved
 for the error bank such that the first error record is at offset 64 and the last
-error record at offset (64 + 63 * `n_err_recs`).
+error record at offset (64 * `n_err_recs`).
 
 <<<
 
@@ -656,8 +656,8 @@ cannot make this distinction then it may conservatively report this field as 0.
 When the error record is not associated with storage elements (e.g., correcting
 errors detected on bus transactions) this field may be hardwired to 0. If this
 property is unconditionally true for a hardware unit then this field may be
-hardwired to 1. For error classes other than CE, the interpretation of the `c`
-bit may be specified in a future standard extension.
+hardwired to 1. For error classes other than CE, the interpretation of the
+`scrub` bit may be specified in a future standard extension.
 
 The error-code (`ec`) is a WARL field that holds an error code that provides a
 description of the detected error. Standard `ec` encodings are defined in
