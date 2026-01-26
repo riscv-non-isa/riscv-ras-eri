@@ -1,4 +1,5 @@
 .RERI Architecture
+* xref:index.adoc[RERI Architecture]
 * xref:reri_contributors.adoc[Contributors]
 * xref:reri_intro.adoc[Introduction]
 * xref:reri_err_reporting.adoc[Error Reporting]
