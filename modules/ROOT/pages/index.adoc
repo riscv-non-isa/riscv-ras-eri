@@ -2,7 +2,5 @@ image::risc-v_logo.svg[]
 
 == RERI Architecture
 
-RERI Architecture landing page
-
 
 Version v1.0, 2024-05-24: Ratified
