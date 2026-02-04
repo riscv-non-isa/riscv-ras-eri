@@ -1,6 +1,15 @@
 image::risc-v_logo.svg[]
 
-== RERI Architecture
+== RISC-V RERI Architecture Specification
 
+RERI Task Group
 
 Version v1.0, 2024-05-24: Ratified
+
+// Preamble
+[WARNING]
+.This document is in the link:http://riscv.org/spec-state[Ratified state]
+====
+No changes are allowed. Any desired or needed changes can be the subject of a
+follow-on new extension. Ratified extensions are never revised.
+====
