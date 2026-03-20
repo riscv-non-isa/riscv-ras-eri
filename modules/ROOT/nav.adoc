@@ -1,5 +1,5 @@
 .RERI Architecture
-* xref:index.adoc[RERI Architecture]
+* xref:index.adoc[Title Page]
 * xref:reri_copyright.adoc[Copyright and License Information]
 * xref:reri_contributors.adoc[Contributors]
 * xref:reri_intro.adoc[Introduction]

@@ -6,5 +6,8 @@ nav:
 
 asciidoc:
   attributes:
-    page-pdf_url: https://github.com/riscv/docs.riscv.org/blob/main/static/pdf/riscv-reri.pdf
     page-group: debug-trace-ras
+    page-card-description: 'Reliability, availability, and serviceability error records.'
+    page-release-date: 'May 2024'
+    page-pdf_url: https://github.com/riscv/docs.riscv.org/blob/main/static/pdf/riscv-reri.pdf
+    more_details_url: https://riscv.atlassian.net/wiki/external/ODE1N2Q2OTJkY2U5NDk2MmI5Zjk2ZmJmYzFiNmI1OTg
