@@ -10,5 +10,5 @@ asciidoc:
     asamBibliography: 'ROOT:resources/reri.bib'
     page-card-description: 'Reliability, availability, and serviceability error records.'
     page-release-date: 'May 2024'
-    page-pdf_url: attachments/riscv-reri.pdf
+    page-pdf_url: _attachments/riscv-reri.pdf
     more_details_url: https://riscv.atlassian.net/wiki/external/ODE1N2Q2OTJkY2U5NDk2MmI5Zjk2ZmJmYzFiNmI1OTg
